@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "prettier": "prettier \"**/*.js\" \"**/*.ts\" \"**/*.vue\" --write --ignore-path .gitignore",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "type": "module",
+  "dependencies": {
+    "es-toolkit": "^1.41.0",
+    "firebase": "^12.5.0"
+  },
+  "devDependencies": {
+    "@mdi/js": "^7.4.47",
+    "@nuxt/eslint": "^1.10.0",
+    "@pinia/nuxt": "^0.11.3",
+    "@vite-pwa/nuxt": "^1.0.7",
+    "eslint": "^9.39.1",
+    "nuxt": "^4.2.1",
+    "pinia": "^3.0.4",
+    "prettier": "^3.1.1",
+    "vuetify-nuxt-module": "^0.18.8"
+  }
+}
