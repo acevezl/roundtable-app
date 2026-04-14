@@ -45,16 +45,6 @@ const items = ref([
         title: 'Welcome',
         to: '/',
     },
-    {
-        icon: 'mdi-chart-bubble',
-        title: 'Inspire',
-        to: '/inspire',
-    },
-    {
-        icon: 'mdi-chart-bubble',
-        title: 'Users',
-        to: '/users',
-    },
 ])
 
 const { logged } = storeToRefs(store)
