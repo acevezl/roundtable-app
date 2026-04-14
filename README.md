@@ -5,6 +5,7 @@
 
 ## Stack
 
+node v23.11
 Nuxt 4, Firebase, Pinia, PWA, Vuetify
 
 ### Firebase config
