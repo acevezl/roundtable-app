@@ -1,6 +1,31 @@
-# demo
+# RoundTable
+## A decision-making app
 
-## Build Setup
+[App description here]
+
+## Stack
+
+## MVP
+
+## Routes
+
+`/` Landing Page
+`/login` - Login
+`/roundtables` - List of RoundTables
+`/roundtables/[id]` - RoundTable details
+`/join/[id]` - join a RoundTable
+
+## Model
+
+`users`
+`roundtables`
+`participants`
+`options`
+`votes`
+
+## How to run it
+
+### Build Setup
 
 ```bash
 # install dependencies
