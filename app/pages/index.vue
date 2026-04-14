@@ -1,3 +1,12 @@
+<script setup>
+    import { onMounted } from 'vue'
+    import { getDB } from '~/services/fireinit'
+
+    onMounted(() => {
+    const db = getDB()
+    console.log('DB initialized:', !!db)
+    })
+</script>
 <template>
     <v-row justify="center" align="center">
         <v-col cols="12" sm="8" md="6">

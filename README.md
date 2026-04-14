@@ -5,7 +5,13 @@
 
 ## Stack
 
+Nuxt 4, Firebase, Pinia, PWA, Vuetify
+
+### Firebase config
+
 ## MVP
+
+[Describe demo flow]
 
 ## Routes
 
@@ -30,6 +36,8 @@
 ```bash
 # install dependencies
 $ npm install
+$ npm install firebase
+$ npm install -g firebase-tools
 
 # serve with hot reload at localhost:3000
 $ npm run dev

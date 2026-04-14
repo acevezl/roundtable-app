@@ -28,6 +28,13 @@ export default defineNuxtConfig({
         // except public ones, these variables can only be read from the server
         public: {
             // public constants can be universally accessed, in both browser and server
+            firebaseApiKey: '',
+            firebaseAuthDomain: '',
+            firebaseProjectId: '',
+            firebaseStorageBucket: '',
+            firebaseMessagingSenderId: '',
+            firebaseAppId: '',
+            useEmulator: 'false',
         },
     },
 })
