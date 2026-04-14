@@ -1,10 +1,30 @@
+# Node
 node_modules
 *.log*
+
+# Nuxt / build
 .nuxt
 .nitro
 .cache
 .output
-.env
 dist
+
+# Env
+.env
+
+# IDE
 .idea
-/.firebase/
+
+# Firebase
+.firebase/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.fseventsd
