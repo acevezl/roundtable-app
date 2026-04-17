@@ -15,9 +15,9 @@ onMounted(() => {
   roundtablesStore.subscribeToMine()
 })
 
-onBeforeUnmount(() => {
-  roundtablesStore.unsubscribe()
-})
+// onBeforeUnmount(() => {
+//   roundtablesStore.unsubscribe()
+// })
 
 function normalizeStatus(rt) {
   const rawStatus = String(rt.status || '').toLowerCase()

@@ -4,6 +4,7 @@ import { useUserStore } from '~/stores/user'
 import { useNuxtApp } from '#app'
 
 const userStore = useUserStore()
+const route = useRoute()
 
 const formRef = ref(null)
 const valid = ref(false)
@@ -27,8 +28,15 @@ const canSubmit = computed(() => !loading.value)
 
 await userStore.initAuth()
 
+function getRedirectTarget() {
+  const r = route.query.redirect
+  if (typeof r === 'string' && r.startsWith('/')) return r
+  if (typeof userStore.afterLogin === 'string' && userStore.afterLogin.startsWith('/')) return userStore.afterLogin
+  return '/roundtables'
+}
+
 if (userStore.logged) {
-  const target = userStore.afterLogin || '/roundtables'
+  const target = getRedirectTarget()
   userStore.setAfterLogin('/')
   await navigateTo(target)
 }
@@ -47,8 +55,9 @@ async function submitSignInForm() {
     })
 
     if (userStore.logged) {
+      const target = getRedirectTarget()
       userStore.setAfterLogin('/')
-      await navigateTo('/roundtables')
+      await navigateTo(target)
     }
   } finally {
     loading.value = false
@@ -56,38 +65,40 @@ async function submitSignInForm() {
 }
 
 async function submitSignUp() {
-	const { valid: isValid } = await formRef.value.validate()
-	if (!isValid) return
+  const { valid: isValid } = await formRef.value.validate()
+  if (!isValid) return
 
-	loading.value = true
-	userStore.clearError()
+  loading.value = true
+  userStore.clearError()
 
-	try {
-		await userStore.signUserUp({
-			email: form.value.email.trim(),
-			password: form.value.password,
-		})
+  try {
+    await userStore.signUserUp({
+      email: form.value.email.trim(),
+      password: form.value.password,
+    })
 
-		if (userStore.logged) {
-			await sendWelcomeEmail(userStore.email)
+    if (userStore.logged) {
+      await sendWelcomeEmail(userStore.email)
 
-			await navigateTo('/roundtables')
-		}
-	} finally {
-		loading.value = false
-	}
+      const target = getRedirectTarget()
+      userStore.setAfterLogin('/')
+      await navigateTo(target)
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 async function sendWelcomeEmail(email) {
-	const { $firestore } = useNuxtApp()
+  const { $firestore } = useNuxtApp()
 
-	await $firestore.collection('mail').add({
-		to: [email],
-		message: {
-			subject: 'Welcome to RoundTable',
-			html: `<p>Welcome to RoundTable.</p>`
-		}
-	})
+  await $firestore.collection('mail').add({
+    to: [email],
+    message: {
+      subject: 'Welcome to RoundTable',
+      html: `<p>Welcome to RoundTable.</p>`
+    }
+  })
 }
 </script>
 

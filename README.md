@@ -174,3 +174,17 @@ in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/store).
 https://pictogrammers.com/library/mdi/
 
 simply use 'mdi-{icon name}'
+
+
+http://localhost:3000/roundtables/8z6VEBDT90vcRjvwzPJn
+
+
+
+Rules
+A user creates a round table and becomes its owner.
+The owner shares the direct link with specific people.
+Any logged-in user who has that link can open the round table.
+Users without the link cannot discover it through the app.
+Opening the link lets them view the round table.
+Clicking Join makes them a participant.
+Only joined participants can add options, vote, and interact.

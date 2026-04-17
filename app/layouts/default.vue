@@ -50,11 +50,6 @@ const items = ref([
         title: 'My RoundTables',
         to: '/roundtables',
     },
-    {
-        icon: 'mdi-vote',
-        title: 'My Votes',
-        to: '/',
-    },
 
 ])
 

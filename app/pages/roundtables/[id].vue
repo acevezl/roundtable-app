@@ -1,6 +1,7 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '~/stores/user'
 import { useRoundtablesStore } from '~/stores/roundtables'
 
 definePageMeta({
@@ -8,92 +9,61 @@ definePageMeta({
 })
 
 const route = useRoute()
-const store = useRoundtablesStore()
+const router = useRouter()
+const userStore = useUserStore()
+const roundtablesStore = useRoundtablesStore()
+
+const roundtableId = computed(() => String(route.params.id || ''))
+
+const loadedRoundtable = computed(() =>
+  roundtablesStore.findLoadedRoundtable(roundtableId.value)
+)
+
+const roundtable = computed(() => roundtablesStore.currentRoundtable || null)
 
 onMounted(() => {
-  store.subscribeToMine()
+  // alert(`DETAIL PAGE mounted with id: ${roundtableId.value}`)
+  // alert('before watchRoundtable call')
+
+  try {
+    roundtablesStore.watchRoundtable(roundtableId.value)
+    // alert('after watchRoundtable call')
+  } catch (err) {
+    alert(`watchRoundtable THREW: ${err?.message || err}`)
+  }
 })
 
-onBeforeUnmount(() => {
-  store.unsubscribe()
+onBeforeUnmount(() => {})
+
+const participantIds = computed(() =>
+  Array.isArray(roundtable.value?.participantIds)
+    ? roundtable.value.participantIds
+    : []
+)
+
+const isOwner = computed(() => {
+  if (!roundtable.value || !userStore.uid) return false
+  return roundtable.value.ownerId === userStore.uid
 })
 
-const rt = computed(() => store.getById(route.params.id))
-const isChildRoute = computed(() => route.path.endsWith('/edit'))
+const isParticipant = computed(() => {
+  if (!userStore.uid) return false
+  return participantIds.value.includes(userStore.uid)
+})
 
-/* ---------------- MOCK CATEGORIES ---------------- */
+const canJoin = computed(() => {
+  if (!roundtable.value) return false
+  if (roundtable.value.status !== 'shared') return false
+  if (isOwner.value) return false
+  if (isParticipant.value) return false
+  return true
+})
 
-const optionGroups = ref([
-  {
-    id: crypto.randomUUID(),
-    name: 'Where?',
-    options: [
-      { id: crypto.randomUUID(), label: 'Italian restaurant' },
-      { id: crypto.randomUUID(), label: 'Japanese restaurant' }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'When?',
-    options: [
-      { id: crypto.randomUUID(), label: 'Friday at 20:00' },
-      { id: crypto.randomUUID(), label: 'Saturday at 14:00' }
-    ]
-  }
-])
+const canParticipate = computed(() => isOwner.value || isParticipant.value)
 
-const newCategoryName = ref('')
-const optionDrafts = reactive({})
-
-function ensureOptionDraft(groupId) {
-  if (!(groupId in optionDrafts)) {
-    optionDrafts[groupId] = ''
-  }
+function goBack() {
+  router.push('/roundtables')
 }
-
-function addCategory() {
-  const name = newCategoryName.value.trim()
-  if (!name) return
-
-  optionGroups.value.push({
-    id: crypto.randomUUID(),
-    name,
-    options: []
-  })
-
-  newCategoryName.value = ''
-}
-
-function removeCategory(groupId) {
-  optionGroups.value = optionGroups.value.filter(g => g.id !== groupId)
-  delete optionDrafts[groupId]
-}
-
-function addOption(groupId) {
-  ensureOptionDraft(groupId)
-
-  const value = optionDrafts[groupId].trim()
-  if (!value) return
-
-  const group = optionGroups.value.find(g => g.id === groupId)
-  if (!group) return
-
-  group.options.push({
-    id: crypto.randomUUID(),
-    label: value
-  })
-
-  optionDrafts[groupId] = ''
-}
-
-function removeOption(groupId, optionId) {
-  const group = optionGroups.value.find(g => g.id === groupId)
-  if (!group) return
-
-  group.options = group.options.filter(o => o.id !== optionId)
-}
-
-/* ---------------- HELPERS ---------------- */
 
 function formatDate(value) {
   if (!value) return '—'
@@ -107,25 +77,31 @@ function formatDate(value) {
 
   return new Intl.DateTimeFormat('en-GB', {
     dateStyle: 'medium',
-    timeStyle: 'short',
+    timeStyle: 'short'
   }).format(date)
 }
 
-function normalizeStatus(value) {
-  const raw = String(value || '').toLowerCase()
+function getStatusLabel(rt) {
+  const raw = String(rt?.status || '').toLowerCase()
 
-  if (['complete', 'completed', 'closed', 'done', 'finalized'].includes(raw)) {
-    return 'Complete'
+  if (raw === 'draft') return 'Draft'
+  if (['archived', 'complete', 'completed', 'closed', 'done'].includes(raw)) return 'Closed'
+  return 'Open'
+}
+
+async function joinRoundtable() {
+  if (!roundtable.value) return
+
+  try {
+    await roundtablesStore.subscribeToRoundtable(roundtable.value.id)
+  } catch (err) {
+    console.error('Join failed:', err)
   }
-
-  if (['draft'].includes(raw)) {
-    return 'Draft'
-  }
-
-  return 'Shared (Open)'
 }
 
 async function shareRoundtable(rt) {
+  if (!rt) return
+
   const url = `${window.location.origin}/roundtables/${rt.id}`
 
   try {
@@ -137,219 +113,185 @@ async function shareRoundtable(rt) {
       })
     } else {
       await navigator.clipboard.writeText(url)
-      alert('Round table link copied to clipboard.')
+      alert('Link copied to clipboard')
     }
-  } catch (error) {
-    console.error('Error sharing round table:', error)
+  } catch (err) {
+    console.error(err)
   }
 }
 </script>
 
 <template>
   <v-container class="py-6">
-    <template v-if="!isChildRoute">
-
-      <div class="mb-6">
-        <h1 class="text-h5">Round Table</h1>
-        <p class="text-medium-emphasis">
-          Add categories and options for the group.
+    <div class="d-flex justify-space-between align-center mb-6">
+      <div>
+        <h1 class="text-h4">Round Table</h1>
+        <p class="text-medium-emphasis mb-0">
+          Review this decision and join if you want to participate.
         </p>
       </div>
 
-      <v-alert
-        v-if="!rt"
-        type="warning"
-        variant="tonal"
+      <v-btn
+        color="secondary"
+        variant="flat"
+        @click="goBack"
       >
-        Round table not found.
-      </v-alert>
+        Back
+      </v-btn>
+    </div>
 
-      <template v-else>
+    <v-alert
+      v-if="roundtablesStore.error"
+      type="error"
+      variant="tonal"
+      class="mb-4"
+    >
+      {{ roundtablesStore.error }}
+    </v-alert>
 
-        <!-- ROUND TABLE CARD -->
-        <v-card class="rt-card mb-6">
-          <v-card-item class="rt-card-item">
-            <template #title>
-              <div class="rt-card-header">
-                <div class="rt-card-heading">
-                  <div class="rt-card-title">
-                    {{ rt.title }}
-                  </div>
+    <v-progress-linear
+      v-if="roundtablesStore.currentRoundtableLoading && !roundtable"
+      indeterminate
+      class="mb-4"
+    />
 
-                  <div class="rt-card-meta">
-                    <span>Created: {{ formatDate(rt.createdAt) }}</span>
-                    <span>Last Update: {{ formatDate(rt.updatedAt) }}</span>
-                  </div>
+    <template v-if="roundtable">
+      <v-card class="rt-card d-flex flex-column w-100">
+        <v-card-item class="rt-card-item">
+          <template #title>
+            <div class="rt-card-header">
+              <div class="rt-card-heading">
+                <div class="rt-card-title">
+                  {{ roundtable.title }}
                 </div>
 
-                <v-chip
-                  size="small"
-                  variant="tonal"
-                  class="rt-card-status"
-                >
-                  {{ normalizeStatus(rt.status) }}
-                </v-chip>
+                <div class="rt-card-meta">
+                  <span>Created: {{ formatDate(roundtable.createdAt) }}</span>
+                  <span>Last update: {{ formatDate(roundtable.updatedAt) }}</span>
+                </div>
               </div>
-            </template>
-          </v-card-item>
 
-          <v-card-text class="rt-card-description">
-            <div class="mb-4">
-              <strong>Question</strong><br />
-              {{ rt.question || '—' }}
-            </div>
-
-            <div>
-              <strong>Description</strong><br />
-              {{ rt.description || '—' }}
-            </div>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-btn
-              color="tertiary"
-              variant="flat"
-              @click="shareRoundtable(rt)"
-            >
-              <v-icon>mdi-share-variant</v-icon>
-            </v-btn>
-
-            <v-btn
-              to="/roundtables"
-              variant="text"
-            >
-              Back
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-
-        <!-- CATEGORIES -->
-        <v-card class="rt-card mb-6">
-          <v-card-item>
-            <v-card-title>Option Categories</v-card-title>
-          </v-card-item>
-
-          <v-card-text>
-
-            <!-- ADD CATEGORY -->
-            <div class="d-flex ga-3 align-center mb-4">
-              <v-text-field
-                v-model="newCategoryName"
-                placeholder="New category (Where? When? Budget?)"
-                variant="outlined"
-                density="compact"
-                hide-details
-                class="flex-grow-1"
-                @keyup.enter="addCategory"
-              />
-
-              <v-btn color="primary" @click="addCategory">
-                Add
-              </v-btn>
-            </div>
-
-            <!-- CATEGORY LIST -->
-            <v-row v-if="optionGroups.length">
-              <v-col
-                v-for="group in optionGroups"
-                :key="group.id"
-                cols="12"
-                md="6"
+              <v-chip
+                size="small"
+                variant="tonal"
+                class="rt-card-status"
               >
-                <v-card variant="outlined">
-                  <v-card-item>
-                    <template #title>
-                      <div class="d-flex justify-space-between align-center">
-                        <span>{{ group.name }}</span>
+                {{ getStatusLabel(roundtable) }}
+              </v-chip>
+            </div>
+          </template>
+        </v-card-item>
 
-                        <v-btn
-                          icon
-                          size="small"
-                          variant="text"
-                          color="error"
-                          @click="removeCategory(group.id)"
-                        >
-                          <v-icon size="18">mdi-trash-can-outline</v-icon>
-                        </v-btn>
-                      </div>
-                    </template>
-                  </v-card-item>
+        <v-card-text class="pt-0">
+          <div class="mb-4">
+            <div class="text-subtitle-2 mb-2">Question</div>
+            <div class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly">
+              {{ roundtable.question || 'No question provided.' }}
+            </div>
+          </div>
 
-                  <v-card-text>
+          <div
+            v-if="roundtable.description"
+            class="mb-4"
+          >
+            <div class="text-subtitle-2 mb-2">Description</div>
+            <div class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly">
+              {{ roundtable.description }}
+            </div>
+          </div>
 
-                    <!-- OPTIONS -->
-                    <v-list v-if="group.options.length" density="compact" class="mb-3">
-                      <v-list-item
-                        v-for="option in group.options"
-                        :key="option.id"
-                      >
-                        <template #title>
-                          <div class="d-flex justify-space-between align-center">
-                            <span>{{ option.label }}</span>
+          <div class="d-flex flex-wrap ga-2 mb-3">
+            <v-chip size="small" variant="outlined">
+              Owner: {{ roundtable.ownerName || 'Unknown user' }}
+            </v-chip>
 
-                            <v-btn
-                              icon
-                              size="x-small"
-                              variant="text"
-                              color="error"
-                              @click="removeOption(group.id, option.id)"
-                            >
-                              <v-icon size="16">mdi-close</v-icon>
-                            </v-btn>
-                          </div>
-                        </template>
-                      </v-list-item>
-                    </v-list>
-
-                    <v-alert
-                      v-else
-                      type="info"
-                      variant="tonal"
-                      class="mb-3"
-                    >
-                      No options yet.
-                    </v-alert>
-
-                    <!-- ADD OPTION -->
-                    <div class="d-flex ga-3 align-center">
-                      <v-text-field
-                        v-model="optionDrafts[group.id]"
-                        placeholder="Add option"
-                        variant="outlined"
-                        density="compact"
-                        hide-details
-                        class="flex-grow-1"
-                        @focus="ensureOptionDraft(group.id)"
-                        @keyup.enter="addOption(group.id)"
-                      />
-
-                      <v-btn
-                        color="secondary"
-                        @click="addOption(group.id)"
-                      >
-                        Add
-                      </v-btn>
-                    </div>
-
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-
-            <v-alert
-              v-else
-              type="info"
+            <v-chip size="small" variant="outlined">
+              Participants: {{ participantIds.length }}
+            </v-chip>
+          </div>
+          <div class="d-flex flex-wrap ga-2">
+            <v-chip
+              v-if="isOwner"
+              size="small"
+              color="primary"
               variant="tonal"
             >
-              No categories yet.
-            </v-alert>
+              You are the owner
+            </v-chip>
 
-          </v-card-text>
-        </v-card>
+            <v-chip
+              v-else-if="isParticipant"
+              size="small"
+              color="primary"
+              variant="tonal"
+            >
+              You joined this round table
+            </v-chip>
 
-      </template>
+            <v-chip
+              v-else
+              size="small"
+              color="warning"
+              variant="tonal"
+            >
+              View only until you join
+            </v-chip>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+            v-if="canJoin"
+            color="primary"
+            variant="flat"
+            :loading="roundtablesStore.loading"
+            @click="joinRoundtable"
+          >
+            <v-icon start>mdi-account-plus</v-icon>
+            Join
+          </v-btn>
+
+          <v-btn
+            v-else-if="isParticipant"
+            color="primary"
+            variant="flat"
+            disabled
+          >
+            <v-icon start>mdi-check</v-icon>
+            Joined
+          </v-btn>
+
+          <v-btn
+            v-else-if="isOwner"
+            color="primary"
+            variant="flat"
+            disabled
+          >
+            <v-icon start>mdi-crown</v-icon>
+            Owner
+          </v-btn>
+
+          <v-spacer />
+
+          <v-btn
+            v-if="isOwner"
+            color="tertiary"
+            variant="flat"
+            @click="shareRoundtable(roundtable)"
+          >
+            <v-icon start>mdi-share-variant</v-icon>
+            Share
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </template>
 
-    <NuxtPage />
+    <v-alert
+      v-else-if="!roundtablesStore.currentRoundtableLoading"
+      type="warning"
+      variant="tonal"
+    >
+      Round table not found or you do not have access to it.
+    </v-alert>
   </v-container>
 </template>
