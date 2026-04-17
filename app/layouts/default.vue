@@ -38,13 +38,24 @@ import { useUserStore } from '@/stores/user'
 
 const store = useUserStore()
 const drawer = ref(false)
-const title = ref('Vue 3 Demo')
+const title = ref('RoundTable')
 const items = ref([
     {
-        icon: 'mdi-apps',
-        title: 'Welcome',
+        icon: 'mdi-home-circle',
+        title: 'Home',
         to: '/',
     },
+    {
+        icon: 'mdi-checkbox-multiple-blank-circle',
+        title: 'My RoundTables',
+        to: '/roundtables',
+    },
+    {
+        icon: 'mdi-vote',
+        title: 'My Votes',
+        to: '/',
+    },
+
 ])
 
 const { logged } = storeToRefs(store)

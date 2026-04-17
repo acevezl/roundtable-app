@@ -112,3 +112,64 @@ This directory contains your Vuex store files. Creating a file in this directory
 
 More information about the usage of this directory
 in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/store).
+
+
+## User Stories
+
+### Feature: Roudtables
+
+1. As a user, I want to create a round table so that I can pose a question to a group.
+2. As a user, I want to edit a round table that has not been shared so that I can correct inaccuracies before inviting others.
+3. As a user, I want to share a round table so that participants can join it.
+4. As a user, I want to delete a round table that has not been shared so that I can remove drafts I no longer need.
+5. As a user, I want to archive an old round table so that I can hide it from my active list without deleting it.
+6. As a user, I want to join a shared round table so that I can subscribe to it, add options, and vote on options.
+
+## RoundTables
+
+### States:
+- Draft: Created, editable, deletable, not shared yet.
+- Open/Shared: Visible to invited users or anyone with the link, joinable.
+- Archived: Hidden from active views, read-only or most inactive.
+- Maybe later: Closed/Resolved, if voting ends and a decision is final.
+
+### RoundTable Lifecycle
+1. Create a round table
+
+1a. Edit draft round table
+1b. Delete draft round table
+
+2. Share round table
+
+3. Join round table
+
+4. Archive round table
+
+### RoundTable Structure
+
+```
+{
+  title: "Where should we go for dinner?",
+  question: "Where should the team go for Friday dinner?",
+  description: "",
+  ownerId: "uid123",
+  ownerName: "Luigi",
+  status: "draft", // draft | shared | archived
+  shareCode: null, // filled only when shared
+  sharedAt: null,
+  archivedAt: null,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp()
+}
+```
+
+## Future Work
+
+- Feature to ensure roundtable share codes are unique (to prevent collisions)
+
+
+# Icons
+
+https://pictogrammers.com/library/mdi/
+
+simply use 'mdi-{icon name}'
