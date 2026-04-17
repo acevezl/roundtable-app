@@ -15,57 +15,11 @@ onMounted(() => {
   roundtablesStore.subscribeToMine()
 })
 
-// onBeforeUnmount(() => {
-//   roundtablesStore.unsubscribe()
-// })
-
-function normalizeStatus(rt) {
-  const rawStatus = String(rt.status || '').toLowerCase()
-
-  if (['complete', 'completed', 'closed', 'done', 'finalized'].includes(rawStatus)) {
-    return 'complete'
-  }
-
-  if (['draft'].includes(rawStatus)) {
-    return 'draft'
-  }
-
-  return 'shared'
-}
-
-const allRoundtables = computed(() => {
-  const merged = [
-    ...(roundtablesStore.drafts || []).map(rt => ({
-      ...rt,
-      _derivedStatus: 'draft'
-    })),
-    ...(roundtablesStore.shared || []).map(rt => ({
-      ...rt,
-      _derivedStatus: normalizeStatus(rt)
-    }))
-  ]
-
-  const deduped = new Map()
-
-  for (const rt of merged) {
-    deduped.set(rt.id, rt)
-  }
-
-  return Array.from(deduped.values())
+onBeforeUnmount(() => {
+  roundtablesStore.unsubscribe()
 })
 
-function getStatusLabel(rt) {
-  const status = rt._derivedStatus || normalizeStatus(rt)
-
-  if (status === 'draft') return 'Draft'
-  if (status === 'complete') return 'Complete'
-  return 'Shared (Open)'
-}
-
-function getStatusColor(rt) {
-  const status = rt._derivedStatus || normalizeStatus(rt)
-  return status
-}
+const allRoundtables = computed(() => roundtablesStore.roundtables || [])
 
 async function shareRoundtable(rt) {
   const url = `${window.location.origin}/roundtables/${rt.id}`
@@ -120,6 +74,16 @@ function isOwner(rt) {
     rt?.createdBy === currentUserId ||
     rt?.userId === currentUserId
   )
+}
+
+function isParticipant(rt) {
+  const currentUserId = getCurrentUserId()
+
+  const ids = Array.isArray(rt?.participantIds)
+    ? rt.participantIds
+    : []
+
+  return ids.includes(currentUserId)
 }
 
 const editingTitleId = ref(null)
@@ -227,8 +191,7 @@ async function createRoundtable() {
   try {
     await roundtablesStore.createRoundtable({
       title,
-      question,
-      status: 'draft'
+      question
     })
 
     cancelCreating()
@@ -420,14 +383,6 @@ async function deleteRoundtable(rt) {
                   </div>
                 </div>
 
-                <v-chip
-                  :color="getStatusColor(rt)"
-                  size="small"
-                  variant="tonal"
-                  class="rt-card-status"
-                >
-                  {{ getStatusLabel(rt) }}
-                </v-chip>
               </div>
             </template>
           </v-card-item>
@@ -458,13 +413,26 @@ async function deleteRoundtable(rt) {
           </v-card-text>
 
           <v-card-actions>
-            <v-btn
-              :to="`/roundtables/${rt.id}`"
-              color="secondary"
-              variant="flat"
-            >
-              Add Options
-            </v-btn>
+              <v-btn
+                v-if="isOwner(rt)"
+                color="primary"
+                variant="flat"
+                disabled
+              >
+                <v-icon start>mdi-crown</v-icon>
+                Owner
+              </v-btn>
+
+              <v-btn
+                v-else-if="isParticipant(rt)"                
+                color="primary"
+                variant="flat"
+                disabled
+              >
+                <v-icon start>mdi-check</v-icon>
+                Joined
+              </v-btn>
+
 
             <v-spacer />
 

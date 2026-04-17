@@ -14,26 +14,15 @@ const userStore = useUserStore()
 const roundtablesStore = useRoundtablesStore()
 
 const roundtableId = computed(() => String(route.params.id || ''))
-
-const loadedRoundtable = computed(() =>
-  roundtablesStore.findLoadedRoundtable(roundtableId.value)
-)
-
 const roundtable = computed(() => roundtablesStore.currentRoundtable || null)
 
 onMounted(() => {
-  // alert(`DETAIL PAGE mounted with id: ${roundtableId.value}`)
-  // alert('before watchRoundtable call')
-
-  try {
-    roundtablesStore.watchRoundtable(roundtableId.value)
-    // alert('after watchRoundtable call')
-  } catch (err) {
-    alert(`watchRoundtable THREW: ${err?.message || err}`)
-  }
+  roundtablesStore.watchRoundtable(roundtableId.value)
 })
 
-onBeforeUnmount(() => {})
+onBeforeUnmount(() => {
+  roundtablesStore.unwatchRoundtable()
+})
 
 const participantIds = computed(() =>
   Array.isArray(roundtable.value?.participantIds)
@@ -53,13 +42,10 @@ const isParticipant = computed(() => {
 
 const canJoin = computed(() => {
   if (!roundtable.value) return false
-  if (roundtable.value.status !== 'shared') return false
   if (isOwner.value) return false
   if (isParticipant.value) return false
   return true
 })
-
-const canParticipate = computed(() => isOwner.value || isParticipant.value)
 
 function goBack() {
   router.push('/roundtables')
@@ -79,14 +65,6 @@ function formatDate(value) {
     dateStyle: 'medium',
     timeStyle: 'short'
   }).format(date)
-}
-
-function getStatusLabel(rt) {
-  const raw = String(rt?.status || '').toLowerCase()
-
-  if (raw === 'draft') return 'Draft'
-  if (['archived', 'complete', 'completed', 'closed', 'done'].includes(raw)) return 'Closed'
-  return 'Open'
 }
 
 async function joinRoundtable() {
@@ -171,13 +149,7 @@ async function shareRoundtable(rt) {
                 </div>
               </div>
 
-              <v-chip
-                size="small"
-                variant="tonal"
-                class="rt-card-status"
-              >
-                {{ getStatusLabel(roundtable) }}
-              </v-chip>
+              
             </div>
           </template>
         </v-card-item>
@@ -209,6 +181,7 @@ async function shareRoundtable(rt) {
               Participants: {{ participantIds.length }}
             </v-chip>
           </div>
+
           <div class="d-flex flex-wrap ga-2">
             <v-chip
               v-if="isOwner"
@@ -234,7 +207,7 @@ async function shareRoundtable(rt) {
               color="warning"
               variant="tonal"
             >
-              View only until you join
+              Join this round table to participate!
             </v-chip>
           </div>
         </v-card-text>

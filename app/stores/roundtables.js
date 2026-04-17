@@ -8,58 +8,62 @@ import { useUserStore } from '~/stores/user'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
 
 function makeShareCode(length = 8) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Removed letters / numbers that could be confused depending on font: IO10
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let out = ''
   for (let i = 0; i < length; i++) {
     out += chars[Math.floor(Math.random() * chars.length)]
   }
-
   return out
 }
 
 export const useRoundtablesStore = defineStore('roundtables', () => {
   const userStore = useUserStore()
-  const { $firestore } = useNuxtApp()
 
-  const collection = useFirestoreCollection('roundtables')
+  const ownedCollection = useFirestoreCollection('roundtables')
+  const joinedCollection = useFirestoreCollection('roundtables')
+
   const loading = ref(false)
 
-  // Detail page state
   const currentRoundtable = ref(null)
   const currentRoundtableLoading = ref(false)
   let unwatchCurrentRoundtableRef = null
 
-  const roundtables = computed(() => collection.docsArray.value)
-
-  const drafts = computed(() =>
-    roundtables.value.filter((rt) => rt.status === 'draft')
+  const error = computed(() =>
+    ownedCollection.error.value || joinedCollection.error.value || ''
   )
 
-  const shared = computed(() =>
-    roundtables.value.filter((rt) => rt.status === 'shared')
-  )
+  const roundtables = computed(() => {
+    const merged = [
+      ...(ownedCollection.docsArray.value || []),
+      ...(joinedCollection.docsArray.value || []),
+    ]
 
-  const archived = computed(() =>
-    roundtables.value.filter((rt) => rt.status === 'archived')
-  )
+    const map = new Map()
+    for (const rt of merged) {
+      map.set(rt.id, rt)
+    }
 
-  const active = computed(() =>
-    roundtables.value.filter((rt) => rt.status !== 'archived')
-  )
+    return Array.from(map.values())
+  })
 
   function subscribeToMine() {
     if (!userStore.uid) return
-    collection.setPath('roundtables')
-    collection.setFilter([['ownerId', '==', userStore.uid]])
-    collection.subscribe()
+
+    ownedCollection.setPath('roundtables')
+    ownedCollection.setFilter([['ownerId', '==', userStore.uid]])
+    ownedCollection.subscribe()
+
+    joinedCollection.setPath('roundtables')
+    joinedCollection.setFilter([['participantIds', 'array-contains', userStore.uid]])
+    joinedCollection.subscribe()
   }
 
   function unsubscribe() {
-    collection.unsubscribe()
+    ownedCollection.unsubscribe()
+    joinedCollection.unsubscribe()
   }
 
   function watchRoundtable(id) {
-
     if (!id) {
       currentRoundtable.value = null
       currentRoundtableLoading.value = false
@@ -78,8 +82,6 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     unwatchCurrentRoundtableRef = onSnapshot(
       roundtableRef,
       (snap) => {
-        // alert(`watchRoundtable exists: ${snap.exists()} | id: ${id}`)
-
         if (snap.exists()) {
           currentRoundtable.value = {
             id: snap.id,
@@ -93,7 +95,6 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
       },
       (err) => {
         console.error('Failed to watch roundtable:', err)
-        // alert(`watchRoundtable failed: ${err?.code || 'no-code'} | ${err?.message || 'no-message'}`)
         currentRoundtable.value = null
         currentRoundtableLoading.value = false
       }
@@ -117,16 +118,13 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     try {
       const now = new Date().toISOString()
 
-      return await collection.add({
+      return await ownedCollection.add({
         title: title.trim(),
         question: question.trim(),
         description: description.trim(),
         ownerId: userStore.uid,
         ownerName: userStore.name || userStore.email || 'Unknown user',
-        status: 'draft',
         shareCode: null,
-        sharedAt: null,
-        archivedAt: null,
         participantIds: [userStore.uid],
         createdAt: now,
         updatedAt: now,
@@ -137,15 +135,12 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
   }
 
   async function updateRoundtable(id, payload) {
-    const existing = collection.documents.value[id]
+    const existing = findLoadedRoundtable(id)
     if (!existing) throw new Error('Round table not found')
-    if (existing.status !== 'draft') {
-      throw new Error('Only draft round tables can be edited')
-    }
 
     loading.value = true
     try {
-      return await collection.update(id, {
+      await ownedCollection.update(id, {
         ...payload,
         updatedAt: new Date().toISOString(),
       })
@@ -155,56 +150,27 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
   }
 
   async function deleteRoundtable(id) {
-    const existing = collection.documents.value[id]
+    const existing = findLoadedRoundtable(id)
     if (!existing) throw new Error('Round table not found')
-    if (existing.status !== 'draft') {
-      throw new Error('Only draft round tables can be deleted')
-    }
 
     loading.value = true
     try {
-      return await collection.remove(id)
+      await ownedCollection.remove(id)
     } finally {
       loading.value = false
     }
   }
 
   async function shareRoundtable(id) {
-    const existing = collection.documents.value[id]
+    const existing = findLoadedRoundtable(id)
     if (!existing) throw new Error('Round table not found')
-    if (existing.status !== 'draft') {
-      throw new Error('Only draft round tables can be shared')
-    }
 
     loading.value = true
     try {
       const now = new Date().toISOString()
 
-      return await collection.update(id, {
-        status: 'shared',
+      await ownedCollection.update(id, {
         shareCode: makeShareCode(),
-        sharedAt: now,
-        updatedAt: now,
-      })
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function archiveRoundtable(id) {
-    const existing = collection.documents.value[id]
-    if (!existing) throw new Error('Round table not found')
-    if (existing.status !== 'shared') {
-      throw new Error('Only shared round tables can be archived')
-    }
-
-    loading.value = true
-    try {
-      const now = new Date().toISOString()
-
-      return await collection.update(id, {
-        status: 'archived',
-        archivedAt: now,
         updatedAt: now,
       })
     } finally {
@@ -219,14 +185,9 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     const existing =
       currentRoundtable.value?.id === id
         ? currentRoundtable.value
-        : collection.documents.value[id]
-          ? { id, ...collection.documents.value[id] }
-          : null
+        : findLoadedRoundtable(id)
 
     if (!existing) throw new Error('Round table not found')
-    if (existing.status !== 'shared') {
-      throw new Error('Only shared round tables can be joined')
-    }
 
     const participantIds = Array.isArray(existing.participantIds)
       ? existing.participantIds
@@ -248,22 +209,17 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
   }
 
   function getById(id) {
-    const doc = collection.documents.value[id]
-    return doc ? { id, ...doc } : null
+    return findLoadedRoundtable(id)
   }
 
   function findLoadedRoundtable(id) {
-  return roundtables.value.find(rt => rt.id === id) || null
+    return roundtables.value.find((rt) => rt.id === id) || null
   }
 
   return {
     loading,
-    error: collection.error,
+    error,
     roundtables,
-    drafts,
-    shared,
-    archived,
-    active,
     currentRoundtable,
     currentRoundtableLoading,
     subscribeToMine,
@@ -274,7 +230,6 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     updateRoundtable,
     deleteRoundtable,
     shareRoundtable,
-    archiveRoundtable,
     subscribeToRoundtable,
     getById,
     findLoadedRoundtable,
