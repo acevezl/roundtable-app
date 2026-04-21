@@ -126,6 +126,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
         ownerName: userStore.name || userStore.email || 'Unknown user',
         shareCode: makeShareCode(10),
         participantIds: [userStore.uid],
+        status: 'Open',
         createdAt: now,
         updatedAt: now,
       })
