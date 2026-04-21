@@ -111,6 +111,23 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     currentRoundtableLoading.value = false
   }
 
+  async function closeVoting(id) {
+    const existing = findLoadedRoundtable(id)
+    if (!existing) throw new Error('Round table not found')
+
+    loading.value = true
+    try {
+      const now = new Date().toISOString()
+
+      await ownedCollection.update(id, {
+        status: 'closed',
+        updatedAt: now,
+      })
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function createRoundtable({ title, question, description = '' }) {
     if (!userStore.uid) throw new Error('User must be logged in')
 
@@ -233,5 +250,6 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     subscribeToRoundtable,
     getById,
     findLoadedRoundtable,
+    closeVoting,
   }
 })
