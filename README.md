@@ -188,3 +188,6 @@ Users without the link cannot discover it through the app.
 Opening the link lets them view the round table.
 Clicking Join makes them a participant.
 Only joined participants can add options, vote, and interact.
+Users cannot list the existing roundtables.
+
+** Create an invite document

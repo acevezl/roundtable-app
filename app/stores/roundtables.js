@@ -124,7 +124,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
         description: description.trim(),
         ownerId: userStore.uid,
         ownerName: userStore.name || userStore.email || 'Unknown user',
-        shareCode: null,
+        shareCode: makeShareCode(10),
         participantIds: [userStore.uid],
         createdAt: now,
         updatedAt: now,
@@ -170,7 +170,6 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
       const now = new Date().toISOString()
 
       await ownedCollection.update(id, {
-        shareCode: makeShareCode(),
         updatedAt: now,
       })
     } finally {
