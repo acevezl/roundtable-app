@@ -4,11 +4,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { doc, getDoc } from 'firebase/firestore'
 import { useRoundtablesStore } from '~/stores/roundtables'
 import { getDB } from '~/services/fireinit'
+import { useUserStore } from '~/stores/user'
 
 definePageMeta({
   middleware: ['authenticated']
 })
 
+const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
 const roundtablesStore = useRoundtablesStore()
@@ -18,6 +20,7 @@ const shareCode = computed(() => String(route.params.code || '').trim())
 const invite = ref(null)
 const loading = ref(false)
 const loadError = ref('')
+
 
 function goBack() {
   router.push('/roundtables')
@@ -94,6 +97,24 @@ onMounted(async () => {
     }
 
     invite.value = result
+
+    // If the user has already joined the roundtable linked to this invite,
+    // do not show the invite, send them directly to watch the roundtable
+    const rtRef = doc(getDB(), 'roundtables', result.roundtableId)
+    const rtSnap = await getDoc(rtRef)
+
+    if (rtSnap.exists()) {
+      const data = rtSnap.data()
+      const participantIds = Array.isArray(data.participantIds)
+        ? data.participantIds
+        : []
+
+      if (participantIds.includes(userStore.uid)) {
+        await router.replace(`/roundtables/${result.roundtableId}`)
+        return
+      }
+    }
+
   } catch (e) {
     console.error('Failed to load invite:', e)
     invite.value = null
