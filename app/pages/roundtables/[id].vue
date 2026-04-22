@@ -67,34 +67,24 @@ function formatDate(value) {
   }).format(date)
 }
 
-async function joinRoundtable() {
-  if (!roundtable.value) return
-
-  try {
-    await roundtablesStore.subscribeToRoundtable(roundtable.value.id)
-  } catch (err) {
-    console.error('Join failed:', err)
-  }
-}
-
 async function shareRoundtable(rt) {
   if (!rt) return
 
-  const url = `${window.location.origin}/roundtables/${rt.id}`
+  try {
+    await roundtablesStore.shareRoundtable(rt)
+  } catch (err) {
+    console.error('Error sharing round table:', err)
+  }
+}
+
+async function leaveRoundTable() {
+  if (!roundtable.value) return
 
   try {
-    if (navigator.share) {
-      await navigator.share({
-        title: rt.title,
-        text: rt.decision,
-        url
-      })
-    } else {
-      await navigator.clipboard.writeText(url)
-      alert('Link copied to clipboard')
-    }
+    await roundtablesStore.unsubscribeFromRoundtable(roundtable.value.id)
+    await router.replace(`/roundtables`)
   } catch (err) {
-    console.error(err)
+    console.error('Unsubscribe failed:', err)
   }
 }
 </script>
@@ -213,19 +203,9 @@ async function shareRoundtable(rt) {
         </v-card-text>
 
         <v-card-actions>
-          <v-btn
-            v-if="canJoin"
-            color="primary"
-            variant="flat"
-            :loading="roundtablesStore.loading"
-            @click="joinRoundtable"
-          >
-            <v-icon start>mdi-account-plus</v-icon>
-            Join
-          </v-btn>
 
           <v-btn
-            v-else-if="isParticipant"
+            v-if="isParticipant"
             color="primary"
             variant="flat"
             disabled
@@ -245,6 +225,17 @@ async function shareRoundtable(rt) {
           </v-btn>
 
           <v-spacer />
+
+          <v-btn
+            v-if="isParticipant && !isOwner"
+            color="secondary"
+            variant="outlined"
+            :loading="roundtablesStore.loading"
+            @click="leaveRoundTable"
+          >
+            <v-icon start>mdi-account-remove</v-icon>
+            Leave
+          </v-btn>
 
           <v-btn
             v-if="isOwner"

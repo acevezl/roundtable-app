@@ -2,19 +2,10 @@
 
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore'
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, limit, query, setDoc, where, onSnapshot, updateDoc } from 'firebase/firestore'
 import { getDB } from '~/services/fireinit'
 import { useUserStore } from '~/stores/user'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
-
-function makeShareCode(length = 8) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let out = ''
-  for (let i = 0; i < length; i++) {
-    out += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return out
-}
 
 export const useRoundtablesStore = defineStore('roundtables', () => {
   const userStore = useUserStore()
@@ -93,8 +84,8 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
 
         currentRoundtableLoading.value = false
       },
-      (err) => {
-        console.error('Failed to watch roundtable:', err)
+      (e) => {
+        // console.error('Failed to watch roundtable:', e)
         currentRoundtable.value = null
         currentRoundtableLoading.value = false
       }
@@ -128,7 +119,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     }
   }
 
-  async function createRoundtable({ title, decision, description = '' }) {
+  async function createRoundtable({ title, decision }) {
     if (!userStore.uid) throw new Error('User must be logged in')
 
     loading.value = true
@@ -138,10 +129,8 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
       return await ownedCollection.add({
         title: title.trim(),
         decision: decision.trim(),
-        description: description.trim(),
         ownerId: userStore.uid,
         ownerName: userStore.name || userStore.email || 'Unknown user',
-        shareCode: makeShareCode(10),
         participantIds: [userStore.uid],
         status: 'Open',
         createdAt: now,
@@ -179,45 +168,135 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     }
   }
 
-  async function shareRoundtable(id) {
-    const existing = findLoadedRoundtable(id)
-    if (!existing) throw new Error('Round table not found')
+  // Share RoundTable
+  // Creates a new roundtableInvite if none exists, or if it is expired
+  async function shareRoundtable(rt) {
+    if (!rt.id) return
 
     loading.value = true
-    try {
-      const now = new Date().toISOString()
 
-      await ownedCollection.update(id, {
-        updatedAt: now,
-      })
+    try {
+      const existingInvite = await getActiveInviteForRoundTable(rt.id)
+
+      let shareCode = null
+
+      if (existingInvite) {
+        const isActive = existingInvite.status === 'active'
+        const notExpired = new Date(existingInvite.expiresAt) > new Date()
+
+        if (isActive && notExpired) {
+          shareCode = existingInvite.id
+        } else {
+          await deleteDoc(
+            doc(getDB(),
+            'roundtableInvites',
+            existingInvite.id
+          ))
+        }
+      }
+
+      if (!shareCode) {
+        shareCode = await createInviteForRoundTable(rt)
+      }
+
+      const url = `${window.location.origin}/join/${shareCode}`
+
+      if (navigator.share){
+        await navigator.share({url})
+      } else {
+        await navigator.clipboard.writeText(url)
+        alert('Round table link copied to clipboard')
+      }
+
+    } catch (e) {
+      console.error('Error sharing round table:', e)
     } finally {
       loading.value = false
     }
+  }
+
+  // Creates an alphanumeric share code
+  function makeShareCode(length = 8) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    let out = ''
+    for (let i = 0; i < length; i++) {
+      out += chars[Math.floor(Math.random() * chars.length)]
+    }
+    return out
+  }
+
+  function addHours(date, hours) {
+    return new Date(date.getTime() + hours * 60 * 60 * 1000)
+  }
+
+  // Retrieves the active RT invite
+  async function getActiveInviteForRoundTable(roundtableId) {
+    
+    const q = query (
+      collection(getDB(), 'roundtableInvites'),
+      where('roundtableId','==', roundtableId),
+      limit(1)
+    )
+
+    const snap = await getDocs(q)
+    if (snap.empty) return null
+
+    const inviteSnap = snap.docs[0]
+    const data = inviteSnap.data()
+
+    return {
+      id: inviteSnap.id,
+      ...data,
+    }
+  }
+
+  async function createInviteForRoundTable(rt) {
+    const now = new Date()
+    const expiresAt = addHours(now, 24) 
+    const shareCode = makeShareCode(10)
+
+    await setDoc(doc(getDB(), 'roundtableInvites', shareCode),
+      {
+        roundtableId: rt.id,
+        ownerId: rt.ownerId,
+        title: rt.title,
+        status: 'active',
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+      }
+    )
+
+    return shareCode
   }
 
   async function subscribeToRoundtable(id) {
     if (!userStore.uid) throw new Error('User must be logged in')
     if (!id) throw new Error('Round table id is required')
 
-    const existing =
-      currentRoundtable.value?.id === id
-        ? currentRoundtable.value
-        : findLoadedRoundtable(id)
+    loading.value = true
+    try {
+      const roundtableRef = doc(getDB(), 'roundtables', id)
 
-    if (!existing) throw new Error('Round table not found')
+      await updateDoc(roundtableRef, {
+        participantIds: arrayUnion(userStore.uid),
+        updatedAt: new Date().toISOString(),
+      })
+    } finally {
+      loading.value = false
+    }
+  }
 
-    const participantIds = Array.isArray(existing.participantIds)
-      ? existing.participantIds
-      : []
-
-    if (participantIds.includes(userStore.uid)) return
+  async function unsubscribeFromRoundtable(id) {
+    if (!userStore.uid) throw new Error('User must be logged in')
+    if (!id) throw new Error('Round table id is required')
 
     loading.value = true
     try {
       const roundtableRef = doc(getDB(), 'roundtables', id)
 
       await updateDoc(roundtableRef, {
-        participantIds: [...participantIds, userStore.uid],
+        participantIds: arrayRemove(userStore.uid),
         updatedAt: new Date().toISOString(),
       })
     } finally {
@@ -248,6 +327,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     deleteRoundtable,
     shareRoundtable,
     subscribeToRoundtable,
+    unsubscribeFromRoundtable,
     getById,
     findLoadedRoundtable,
     closeVoting,

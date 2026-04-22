@@ -22,21 +22,12 @@ onBeforeUnmount(() => {
 const allRoundtables = computed(() => roundtablesStore.roundtables || [])
 
 async function shareRoundtable(rt) {
-  const url = `${window.location.origin}/roundtables/${rt.id}`
+  if (!rt) return
 
   try {
-    if (navigator.share) {
-      await navigator.share({
-        title: rt.title,
-        text: rt.decision,
-        url
-      })
-    } else {
-      await navigator.clipboard.writeText(url)
-      alert('Round table link copied to clipboard.')
-    }
-  } catch (error) {
-    console.error('Error sharing round table:', error)
+    await roundtablesStore.shareRoundtable(rt)
+  } catch (err) {
+    console.error('Error sharing round table:', err)
   }
 }
 
@@ -87,10 +78,10 @@ function isParticipant(rt) {
 }
 
 const editingTitleId = ref(null)
-const editingDescriptionId = ref(null)
+const EditingDecisionId = ref(null)
 
 const tempTitle = ref('')
-const tempDescription = ref('')
+const tempDecision = ref('')
 
 function startEditTitle(rt) {
   if (!isOwner(rt)) return
@@ -98,10 +89,10 @@ function startEditTitle(rt) {
   tempTitle.value = rt.title || ''
 }
 
-function startEditDescription(rt) {
+function startEditDecision(rt) {
   if (!isOwner(rt)) return
-  editingDescriptionId.value = rt.id
-  tempDescription.value = rt.decision || ''
+  EditingDecisionId.value = rt.id
+  tempDecision.value = rt.decision || ''
 }
 
 function cancelTitleEdit() {
@@ -109,9 +100,9 @@ function cancelTitleEdit() {
   tempTitle.value = ''
 }
 
-function cancelDescriptionEdit() {
-  editingDescriptionId.value = null
-  tempDescription.value = ''
+function cancelDecisionEdit() {
+  EditingDecisionId.value = null
+  tempDecision.value = ''
 }
 
 async function saveTitle(rt) {
@@ -131,16 +122,16 @@ async function saveTitle(rt) {
   cancelTitleEdit()
 }
 
-async function saveDescription(rt) {
+async function saveDecision(rt) {
   if (!isOwner(rt)) return
 
-  const nextDecision = tempDescription.value.trim()
+  const nextDecision = tempDecision.value.trim()
 
   await roundtablesStore.updateRoundtable(rt.id, {
     decision: nextDecision,
   })
 
-  cancelDescriptionEdit()
+  cancelDecisionEdit()
 }
 
 const creating = ref(false)
@@ -296,7 +287,7 @@ async function deleteRoundtable(rt) {
             </template>
           </v-card-item>
 
-          <v-card-text class="rt-card-description flex-grow-1">
+          <v-card-text class="rt-card-decision flex-grow-1">
             <v-textarea
               v-model="newRoundtable.decision"
               variant="outlined"
@@ -387,25 +378,25 @@ async function deleteRoundtable(rt) {
             </template>
           </v-card-item>
 
-          <v-card-text class="rt-card-description flex-grow-1">
-            <template v-if="editingDescriptionId === rt.id">
+          <v-card-text class="rt-card-decision flex-grow-1">
+            <template v-if="EditingDecisionId === rt.id">
               <v-textarea
-                v-model="tempDescription"
+                v-model="tempDecision"
                 variant="outlined"
                 density="compact"
                 auto-grow
                 hide-details
                 rows="3"
-                @keyup.esc="cancelDescriptionEdit"
-                @blur="saveDescription(rt)"
+                @keyup.esc="cancelDecisionEdit"
+                @blur="saveDecision(rt)"
               />
             </template>
 
             <template v-else>
               <div
-                class="rt-inline-editable rt-inline-editable--description"
+                class="rt-inline-editable rt-inline-editable--decision"
                 :class="{ 'rt-inline-editable--readonly': !isOwner(rt) }"
-                @click="startEditDescription(rt)"
+                @click="startEditDecision(rt)"
               >
                 {{ rt.decision }}
               </div>
@@ -493,7 +484,7 @@ async function deleteRoundtable(rt) {
             </template>
           </v-card-item>
 
-          <v-card-text class="rt-card-description flex-grow-1">
+          <v-card-text class="rt-card-decision flex-grow-1">
             <v-textarea
               v-model="newRoundtable.decision"
               variant="outlined"
