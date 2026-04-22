@@ -28,7 +28,7 @@ async function shareRoundtable(rt) {
     if (navigator.share) {
       await navigator.share({
         title: rt.title,
-        text: rt.question,
+        text: rt.decision,
         url
       })
     } else {
@@ -101,7 +101,7 @@ function startEditTitle(rt) {
 function startEditDescription(rt) {
   if (!isOwner(rt)) return
   editingDescriptionId.value = rt.id
-  tempDescription.value = rt.question || ''
+  tempDescription.value = rt.decision || ''
 }
 
 function cancelTitleEdit() {
@@ -134,10 +134,10 @@ async function saveTitle(rt) {
 async function saveDescription(rt) {
   if (!isOwner(rt)) return
 
-  const nextQuestion = tempDescription.value.trim()
+  const nextDecision = tempDescription.value.trim()
 
   await roundtablesStore.updateRoundtable(rt.id, {
-    question: nextQuestion,
+    decision: nextDecision,
   })
 
   cancelDescriptionEdit()
@@ -149,7 +149,7 @@ const createTitleRef = ref(null)
 
 const newRoundtable = reactive({
   title: '',
-  question: ''
+  decision: ''
 })
 
 const displayRoundtables = computed(() => {
@@ -177,12 +177,12 @@ async function startCreating() {
 function cancelCreating() {
   creating.value = false
   newRoundtable.title = ''
-  newRoundtable.question = ''
+  newRoundtable.decision = ''
 }
 
 async function createRoundtable() {
   const title = newRoundtable.title.trim()
-  const question = newRoundtable.question.trim()
+  const decision = newRoundtable.decision.trim()
 
   if (!title || creatingBusy.value) return
 
@@ -191,7 +191,7 @@ async function createRoundtable() {
   try {
     await roundtablesStore.createRoundtable({
       title,
-      question
+      decision
     })
 
     cancelCreating()
@@ -298,7 +298,7 @@ async function deleteRoundtable(rt) {
 
           <v-card-text class="rt-card-description flex-grow-1">
             <v-textarea
-              v-model="newRoundtable.question"
+              v-model="newRoundtable.decision"
               variant="outlined"
               density="compact"
               auto-grow
@@ -407,7 +407,7 @@ async function deleteRoundtable(rt) {
                 :class="{ 'rt-inline-editable--readonly': !isOwner(rt) }"
                 @click="startEditDescription(rt)"
               >
-                {{ rt.question }}
+                {{ rt.decision }}
               </div>
             </template>
           </v-card-text>
@@ -495,7 +495,7 @@ async function deleteRoundtable(rt) {
 
           <v-card-text class="rt-card-description flex-grow-1">
             <v-textarea
-              v-model="newRoundtable.question"
+              v-model="newRoundtable.decision"
               variant="outlined"
               density="compact"
               auto-grow

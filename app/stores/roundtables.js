@@ -128,7 +128,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     }
   }
 
-  async function createRoundtable({ title, question, description = '' }) {
+  async function createRoundtable({ title, decision, description = '' }) {
     if (!userStore.uid) throw new Error('User must be logged in')
 
     loading.value = true
@@ -137,7 +137,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
 
       return await ownedCollection.add({
         title: title.trim(),
-        question: question.trim(),
+        decision: decision.trim(),
         description: description.trim(),
         ownerId: userStore.uid,
         ownerName: userStore.name || userStore.email || 'Unknown user',

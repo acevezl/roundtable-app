@@ -19,7 +19,7 @@ const submitError = ref('')
 
 const form = ref({
   title: '',
-  question: '',
+  decision: '',
   description: '',
 })
 
@@ -28,9 +28,9 @@ const titleRules = [
   (v) => v.trim().length >= 4 || 'Title must be at least 4 characters',
 ]
 
-const questionRules = [
-  (v) => !!v?.trim() || 'Question is required',
-  (v) => v.trim().length >= 10 || 'Question must be at least 10 characters',
+const decisionRules = [
+  (v) => !!v?.trim() || 'Decision is required',
+  (v) => v.trim().length >= 10 || 'Decision must be at least 10 characters',
 ]
 
 const descriptionRules = [
@@ -52,7 +52,7 @@ async function submitForm() {
   try {
     const docId = await roundtablesStore.createRoundtable({
       title: form.value.title,
-      question: form.value.question,
+      decision: form.value.decision,
       description: form.value.description,
     })
 
@@ -67,7 +67,7 @@ async function submitForm() {
 function resetForm() {
   form.value = {
     title: '',
-    question: '',
+    decision: '',
     description: '',
   }
   submitError.value = ''
@@ -113,10 +113,10 @@ function resetForm() {
               />
 
               <v-textarea
-                v-model="form.question"
-                label="Question"
+                v-model="form.decision"
+                label="Decision"
                 placeholder="Where should we go for dinner this Friday?"
-                :rules="questionRules"
+                :rules="decisionRules"
                 variant="outlined"
                 rows="3"
                 auto-grow

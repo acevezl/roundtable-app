@@ -86,7 +86,7 @@ async function shareRoundtable(rt) {
     if (navigator.share) {
       await navigator.share({
         title: rt.title,
-        text: rt.question,
+        text: rt.decision,
         url
       })
     } else {
@@ -156,9 +156,9 @@ async function shareRoundtable(rt) {
 
         <v-card-text class="pt-0">
           <div class="mb-4">
-            <div class="text-subtitle-2 mb-2">Question</div>
+            <div class="text-subtitle-2 mb-2">Decision</div>
             <div class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly">
-              {{ roundtable.question || 'No question provided.' }}
+              {{ roundtable.decision || 'No decision text provided.' }}
             </div>
           </div>
 
