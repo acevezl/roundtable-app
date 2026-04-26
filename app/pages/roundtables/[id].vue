@@ -1,8 +1,10 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '~/stores/user'
 import { useRoundtablesStore } from '~/stores/roundtables'
+
+import { useQuestions } from '~/composables/useQuestions'
 
 definePageMeta({
   middleware: ['authenticated']
@@ -16,8 +18,26 @@ const roundtablesStore = useRoundtablesStore()
 const roundtableId = computed(() => String(route.params.id || ''))
 const roundtable = computed(() => roundtablesStore.currentRoundtable || null)
 
+//[!]test junk
+//const questions = ref([
+//  { id: '1', title: 'First test question' },
+//  { id: '2', title: 'Another test question' }
+//])
+const { questions, addQuestion } = useQuestions(roundtableId.value)
+console.log(questions.value)
+const newTitle = ref('')
+function handleAdd() {
+  addQuestion({
+    author: 'test-user',
+    title: newTitle.value
+  })
+  newTitle.value = ''
+  console.log(questions.value)
+}
+
 onMounted(() => {
   roundtablesStore.watchRoundtable(roundtableId.value)
+
 })
 
 onBeforeUnmount(() => {
@@ -108,6 +128,35 @@ async function leaveRoundTable() {
       </v-btn>
     </div>
 
+
+
+
+
+
+
+
+
+    <div>
+      <input v-model="newTitle" placeholder="Question title" />
+      <button @click="handleAdd">Add Question</button>
+
+      <ul>
+        <li v-for="q in questions" :key="q.id">
+          {{ q.title }}
+        </li>
+      </ul>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
     <v-alert
       v-if="roundtablesStore.error"
       type="error"
@@ -151,6 +200,7 @@ async function leaveRoundTable() {
               {{ roundtable.decision || 'No decision text provided.' }}
             </div>
           </div>
+
 
           <div
             v-if="roundtable.description"
