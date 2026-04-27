@@ -23,16 +23,13 @@ const roundtable = computed(() => roundtablesStore.currentRoundtable || null)
 //  { id: '1', title: 'First test question' },
 //  { id: '2', title: 'Another test question' }
 //])
-const { questions, addQuestion } = useQuestions(roundtableId.value)
-console.log(questions.value)
+const { questions, addQuestion } = useQuestions(`roundtables/${roundtableId.value}`)
 const newTitle = ref('')
 function handleAdd() {
   addQuestion({
-    author: 'test-user',
     title: newTitle.value
   })
   newTitle.value = ''
-  console.log(questions.value)
 }
 
 onMounted(() => {
@@ -128,35 +125,6 @@ async function leaveRoundTable() {
       </v-btn>
     </div>
 
-
-
-
-
-
-
-
-
-    <div>
-      <input v-model="newTitle" placeholder="Question title" />
-      <button @click="handleAdd">Add Question</button>
-
-      <ul>
-        <li v-for="q in questions" :key="q.id">
-          {{ q.title }}
-        </li>
-      </ul>
-    </div>
-
-
-
-
-
-
-
-
-
-
-
     <v-alert
       v-if="roundtablesStore.error"
       type="error"
@@ -210,6 +178,12 @@ async function leaveRoundTable() {
             <div class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly">
               {{ roundtable.description }}
             </div>
+          </div>
+
+          <div>
+            <input v-model="newTitle" placeholder="Question title" />
+            <button @click="handleAdd">Add Question</button>
+            <QuestionCard v-for="q in questions" :key="q.id" :question="q" />
           </div>
 
           <div class="d-flex flex-wrap ga-2 mb-3">

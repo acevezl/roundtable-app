@@ -2,8 +2,8 @@ import { serverTimestamp } from 'firebase/firestore'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
 import { ref, computed, onUnmounted } from 'vue'
 
-export function useQuestions(roundtableId) {
-  const questionsCollection = useFirestoreCollection(`roundtables/${roundtableId}/questions`)
+export function useQuestions(roundtablePath) {
+  const questionsCollection = useFirestoreCollection(`${roundtablePath}/questions`)
 
   const questions = computed(() => {
     return questionsCollection.docsArray.value || []
@@ -33,6 +33,7 @@ export function useQuestions(roundtableId) {
   return {
     questions,
     error,
-    addQuestion
+    addQuestion,
+    path: questionsCollection.path
   }
 }

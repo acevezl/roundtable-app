@@ -49,6 +49,7 @@ export const useFirestoreCollection = (
         const { type, doc } = change
         if (type === 'added' || type === 'modified') {
             documents.value[doc.id] = doc.data()
+            documents.value[doc.id]['path'] = `${path.value}/${doc.id}`
         }
         if (type === 'removed') {
             delete documents.value[doc.id]
