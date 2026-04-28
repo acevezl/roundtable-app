@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
-    "test:run": "firebase emulators:exec --only firestore,auth 'vitest run'"
+    "test:run": "firebase emulators:exec --only firestore,auth 'vitest run'",
+    "upload-security-rules": "firebase deploy --only firestore:rules"
   },
   "type": "module",
   "dependencies": {
