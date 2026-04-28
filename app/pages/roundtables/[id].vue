@@ -21,7 +21,8 @@ const roundtable = computed(() => roundtablesStore.currentRoundtable || null)
 const {
   questions,
   addQuestion,
-  removeQuestion
+  removeQuestion,
+  editQuestionTitle,
 } = useQuestions(`roundtables/${roundtableId.value}`)
 const newTitle = ref('')
 function handleAdd() {
@@ -33,7 +34,6 @@ function handleAdd() {
 
 onMounted(() => {
   roundtablesStore.watchRoundtable(roundtableId.value)
-
 })
 
 onBeforeUnmount(() => {
@@ -196,8 +196,11 @@ async function leaveRoundTable() {
             <input v-model="newTitle" placeholder="Question title" />
             <button @click="handleAdd">Add Question</button>
             <template v-for="q in questions" :key="q.id">
-              <QuestionCard  :question="q" />
-              <button @click="removeQuestion(q.id)">Remove Question</button>
+              <QuestionCard
+                :question="q"
+                @editQuestionTitle="(title) => editQuestionTitle(q.id, title)"
+                @removeQuestion="removeQuestion(q.id)"
+              />
             </template>
           </div>
           <div class="d-flex flex-wrap ga-2 mb-3">
