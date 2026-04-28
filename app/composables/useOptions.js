@@ -45,11 +45,21 @@ export function useOptions(questionPath) {
     }
   }
 
+  async function editOption(optionId, title) {
+    try {
+      await optionsCollection.update(optionId, { title })
+    } catch (err) {
+      console.error('Failed to edit option:', err)
+      error.value = err
+    }
+  }
+
   return {
     options,
     error,
     addOption,
     removeOption,
+    editOption,
     path: optionsCollection.path
   }
 }

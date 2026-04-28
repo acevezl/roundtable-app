@@ -5,7 +5,12 @@ const props = defineProps({
   question: { type: Object, required: true },
 })
 
-const { options, addOption, removeOption } = useOptions(props.question.path)
+const { 
+  options, 
+  addOption, 
+  removeOption, 
+  editOption 
+} = useOptions(props.question.path)
 
 const newTitle = ref('')
 function handleAdd() {
@@ -14,7 +19,6 @@ function handleAdd() {
   })
   newTitle.value = ''
 }
-
 
 </script>
 
@@ -25,8 +29,9 @@ function handleAdd() {
     <button @click="handleAdd">Add Option</button>
     <ul>
       <li v-for="o in options" :key="o.id">
-        <OptionCard :option="o" />
-        <button @click="removeOption(o.id)">Remove Option</button>
+        <OptionCard :option="o"
+          @editOption="(title) => editOption(o.id, title)"
+          @removeOption="removeOption(o.id)"/>
       </li>
     </ul>
   </div>
