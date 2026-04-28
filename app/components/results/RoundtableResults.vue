@@ -16,7 +16,7 @@ const { questions } = useQuestions(`roundtables/${props.roundtableId}`)
     </div>
 
     <v-alert v-if="questions.length === 0" type="info" variant="tonal">
-      No questions were registered for this round table.
+      No questions were registered for this RoundTable.
     </v-alert>
 
     <ResultsQuestionResult
