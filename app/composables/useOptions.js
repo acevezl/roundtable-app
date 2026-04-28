@@ -32,6 +32,7 @@ export function useOptions(questionPath) {
   return {
     options,
     error,
-    addOption
+    addOption,
+    path: optionsCollection.path
   }
 }

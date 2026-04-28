@@ -8,7 +8,9 @@
     "postinstall": "nuxt prepare",
     "prettier": "prettier \"**/*.js\" \"**/*.ts\" \"**/*.vue\" --write --ignore-path .gitignore",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:run": "firebase emulators:exec --only firestore,auth 'vitest run'"
   },
   "type": "module",
   "dependencies": {
@@ -22,13 +24,18 @@
   "devDependencies": {
     "@mdi/js": "^7.4.47",
     "@nuxt/eslint": "^1.10.0",
+    "@nuxt/test-utils": "^3.19.1",
     "@pinia/nuxt": "^0.11.3",
     "@types/node": "^25.6.0",
     "@vite-pwa/nuxt": "^1.0.7",
+    "@vitest/ui": "^3.2.4",
+    "@vue/test-utils": "^2.4.9",
     "eslint": "^9.39.1",
+    "happy-dom": "^17.6.3",
     "nuxt": "^4.2.1",
     "pinia": "^3.0.4",
     "prettier": "^3.1.1",
+    "vitest": "^3.2.4",
     "vuetify-nuxt-module": "^0.18.8"
   }
 }

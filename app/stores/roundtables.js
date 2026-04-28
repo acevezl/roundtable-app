@@ -132,7 +132,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
         ownerId: userStore.uid,
         ownerName: userStore.name || userStore.email || 'Unknown user',
         participantIds: [userStore.uid],
-        status: 'Open',
+        status: 'open',
         createdAt: now,
         updatedAt: now,
       })
