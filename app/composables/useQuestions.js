@@ -1,3 +1,4 @@
+import { getAuth } from 'firebase/auth'
 import { serverTimestamp } from 'firebase/firestore'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
 import { ref, computed, onUnmounted } from 'vue'
@@ -21,8 +22,13 @@ export function useQuestions(roundtablePath) {
   // add a new question
   async function addQuestion({ title }) {
     try {
+      const auth = getAuth()
+      const uid = auth.currentUser?.uid
       await questionsCollection.add({
         title,
+        ownerId: uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       })
     } catch (err) {
       console.error('Failed to add question:', err)

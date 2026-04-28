@@ -1,3 +1,4 @@
+import { getAuth } from 'firebase/auth'
 import { serverTimestamp } from 'firebase/firestore'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
 import { ref, computed, onUnmounted } from 'vue'
@@ -20,9 +21,14 @@ export function useOptions(questionPath) {
 
   // add a new option
   async function addOption({ title }) {
+    const auth = getAuth()
+    const uid = auth.currentUser?.uid
     try {
       await optionsCollection.add({
         title,
+        ownerId: uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       })
     } catch (err) {
       console.error('Failed to add option:', err)
