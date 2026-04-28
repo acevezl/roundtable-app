@@ -20,6 +20,7 @@ export function useQuestions(roundtablePath) {
 
   // add a new question
   async function addQuestion({ title }) {
+    if (!title?.trim()) return
     try {
       await questionsCollection.add({
         title,

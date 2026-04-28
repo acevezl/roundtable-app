@@ -1,6 +1,5 @@
-import { serverTimestamp } from 'firebase/firestore'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 export function useOptions(questionPath) {
   const optionsCollection = useFirestoreCollection(`${questionPath}/options`)

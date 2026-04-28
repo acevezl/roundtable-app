@@ -15,7 +15,7 @@
     "@dataconnect/generated": "file:src/dataconnect-generated",
     "@mdi/font": "^7.4.47",
     "es-toolkit": "^1.41.0",
-    "firebase": "^12.12.0",
+    "firebase": "^12.12.1",
     "vite-plugin-vuetify": "^2.1.3",
     "vuetify": "^4.0.5"
   },

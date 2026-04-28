@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { useOptions } from '~/composables/useOptions'
 
 const props = defineProps({
@@ -8,7 +9,9 @@ const props = defineProps({
 const { options, addOption } = useOptions(props.question.path)
 
 const newTitle = ref('')
+
 function handleAdd() {
+  if (!newTitle.value.trim()) return
   addOption({
     title: newTitle.value
   })
@@ -18,14 +21,19 @@ function handleAdd() {
 </script>
 
 <template>
-  <div>
+  <v-card variant="outlined" class=".question-card">
     <h3>{{ question.title }}</h3>
     <input v-model="newTitle" placeholder="Option title" />
     <button @click="handleAdd">Add Option</button>
-    <ul>
-      <li v-for="o in options" :key="o.id">
-        <OptionCard :option="o" />
-      </li>
-    </ul>
-  </div>
+
+    <div class="cards">
+      <OptionCard
+        v-for="o in options"
+        :key="o.id"
+        :option="o"
+        class="option-card"
+      />
+    </div>
+  
+  </v-card>
 </template>
