@@ -19,10 +19,15 @@ const { questions } = useQuestions(`roundtables/${props.roundtableId}`)
       No questions were registered for this RoundTable.
     </v-alert>
 
-    <ResultsQuestionResult
-      v-for="q in questions"
-      :key="q.id"
-      :question="q"
-    />
+    <v-row>
+      <v-col
+        v-for="q in questions"
+        :key="q.id"
+        cols="12"
+        md="4"
+      >
+    <ResultsQuestionResult :question="q" />
+      </v-col>
+    </v-row>
   </div>
 </template>
