@@ -347,11 +347,22 @@ async function deleteRoundtable(rt) {
 
                     <template v-else>
                       <div
-                        class="rt-inline-editable rt-inline-editable--title"
+                        class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
                         :class="{ 'rt-inline-editable--readonly': !isOwner(rt) }"
                         @click="startEditTitle(rt)"
                       >
-                        {{ rt.title }}                        
+                        <span>{{ rt.title }}</span>
+
+                        <v-chip
+                          size="x-small"
+                          variant="tonal"
+                          :color="rt.status === 'Open' ? 'success' : 'error'"
+                        >
+                          <v-icon size="14">
+                            {{ rt.status === 'Open' ? 'mdi-lock-open' : 'mdi-lock' }}
+                          </v-icon>
+                          {{ rt.status }}
+                        </v-chip>
                       </div>
                     </template>
                   </div>
@@ -436,6 +447,7 @@ async function deleteRoundtable(rt) {
             </v-btn>
 
             <v-btn
+              v-if="isOwner && rt.status == 'Open'"
               color="tertiary"
               variant="flat"
               @click="shareRoundtable(rt)"

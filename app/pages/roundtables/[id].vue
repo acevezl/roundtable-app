@@ -146,8 +146,21 @@ async function leaveRoundTable() {
           <template #title>
             <div class="rt-card-header">
               <div class="rt-card-heading">
-                <div class="rt-card-title">
-                  {{ roundtable.title }}
+                <div
+                  class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
+                >
+                  <span>{{ roundtable.title }}</span>
+
+                  <v-chip
+                    size="x-small"
+                    variant="tonal"
+                    :color="roundtable.status === 'Open' ? 'success' : 'error'"
+                  >
+                    <v-icon size="14">
+                      {{ roundtable.status === 'Open' ? 'mdi-lock-open' : 'mdi-lock' }}
+                    </v-icon>
+                    {{ roundtable.status }}
+                  </v-chip>
                 </div>
 
                 <div class="rt-card-meta">
@@ -262,7 +275,7 @@ async function leaveRoundTable() {
           </v-btn>
 
           <v-btn
-            v-if="isOwner"
+            v-if="isOwner && roundtable.status == 'Open'"
             color="tertiary"
             variant="flat"
             @click="shareRoundtable(roundtable)"

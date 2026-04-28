@@ -111,7 +111,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
       const now = new Date().toISOString()
 
       await ownedCollection.update(id, {
-        status: 'closed',
+        status: 'Closed',
         updatedAt: now,
       })
     } finally {
