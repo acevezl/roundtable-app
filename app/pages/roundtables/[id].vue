@@ -284,7 +284,7 @@ async function leaveRoundTable() {
           </v-btn>
         </v-card-actions>
       </v-card>
-      <RoundtableResults
+      <ResultsRoundtableResults
         v-if="roundtable.status === 'closed'"
         :roundtable-id="roundtableId"
       />
