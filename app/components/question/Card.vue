@@ -5,7 +5,7 @@ const props = defineProps({
   question: { type: Object, required: true },
 })
 
-const { options, addOption } = useOptions(props.question.path)
+const { options, addOption, removeOption } = useOptions(props.question.path)
 
 const newTitle = ref('')
 function handleAdd() {
@@ -14,6 +14,7 @@ function handleAdd() {
   })
   newTitle.value = ''
 }
+
 
 </script>
 
@@ -25,6 +26,7 @@ function handleAdd() {
     <ul>
       <li v-for="o in options" :key="o.id">
         <OptionCard :option="o" />
+        <button @click="removeOption(o.id)">Remove Option</button>
       </li>
     </ul>
   </div>

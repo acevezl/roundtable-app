@@ -36,10 +36,20 @@ export function useOptions(questionPath) {
     }
   }
 
+  async function removeOption(optionId) {
+    try {
+      await optionsCollection.remove(optionId)
+    } catch (err) {
+      console.error('Failed to remove option:', err)
+      error.value = err
+    }
+  }
+
   return {
     options,
     error,
     addOption,
+    removeOption,
     path: optionsCollection.path
   }
 }
