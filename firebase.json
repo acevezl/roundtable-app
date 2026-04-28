@@ -1,0 +1,32 @@
+{
+  "firestore": {
+    "database": "db-roundtable",
+    "location": "europe-southwest1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "site":"round-table",
+    "public": ".output/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "RoundTable",
+        "supportEmail": "the.real.knights.of.the.round.table@gmail.com"
+      }
+    }
+  }
+}
