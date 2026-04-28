@@ -18,12 +18,11 @@ const roundtablesStore = useRoundtablesStore()
 const roundtableId = computed(() => String(route.params.id || ''))
 const roundtable = computed(() => roundtablesStore.currentRoundtable || null)
 
-//[!]test junk
-//const questions = ref([
-//  { id: '1', title: 'First test question' },
-//  { id: '2', title: 'Another test question' }
-//])
-const { questions, addQuestion } = useQuestions(`roundtables/${roundtableId.value}`)
+const {
+  questions,
+  addQuestion,
+  removeQuestion
+} = useQuestions(`roundtables/${roundtableId.value}`)
 const newTitle = ref('')
 function handleAdd() {
   addQuestion({
@@ -196,7 +195,10 @@ async function leaveRoundTable() {
           <div>
             <input v-model="newTitle" placeholder="Question title" />
             <button @click="handleAdd">Add Question</button>
-            <QuestionCard v-for="q in questions" :key="q.id" :question="q" />
+            <template v-for="q in questions" :key="q.id">
+              <QuestionCard  :question="q" />
+              <button @click="removeQuestion(q.id)">Remove Question</button>
+            </template>
           </div>
           <div class="d-flex flex-wrap ga-2 mb-3">
             <v-chip size="small" variant="outlined">

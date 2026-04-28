@@ -35,11 +35,20 @@ export function useQuestions(roundtablePath) {
       error.value = err
     }
   }
+  async function removeQuestion(questionId) {
+    try {
+      await questionsCollection.remove(questionId)
+    } catch (err) {
+      console.error('Failed to remove question:', err)
+      error.value = err
+    }
+  }
 
   return {
     questions,
     error,
     addQuestion,
+    removeQuestion,
     path: questionsCollection.path
   }
 }
