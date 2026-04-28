@@ -198,7 +198,6 @@ async function leaveRoundTable() {
             <button @click="handleAdd">Add Question</button>
             <QuestionCard v-for="q in questions" :key="q.id" :question="q" />
           </div>
-
           <div class="d-flex flex-wrap ga-2 mb-3">
             <v-chip size="small" variant="outlined">
               Owner: {{ roundtable.ownerName || 'Unknown user' }}
@@ -285,6 +284,11 @@ async function leaveRoundTable() {
           </v-btn>
         </v-card-actions>
       </v-card>
+      <RoundtableResults
+        v-if="roundtable.status === 'closed'"
+        :roundtable-id="roundtableId"
+      />
+      
     </template>
 
     <v-alert
