@@ -27,6 +27,7 @@ export function useQuestions(roundtablePath) {
       await questionsCollection.add({
         title,
         ownerId: uid,
+        votes: {},
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
