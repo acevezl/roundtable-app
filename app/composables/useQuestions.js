@@ -21,6 +21,8 @@ export function useQuestions(roundtablePath) {
   const questionsAPI = {
     addQuestion: async ({ title }) => {
       try {
+        if (!title)
+          throw new Error("titles cannot be empty")
         const auth = getAuth()
         const uid = auth.currentUser?.uid
         await questionsCollection.add({
@@ -45,6 +47,8 @@ export function useQuestions(roundtablePath) {
     },
     editQuestionTitle: async (questionId, title) => {
       try {
+        if (!title)
+          throw new Error("titles cannot be empty")
         await questionsCollection.update(questionId, {
           title,
           updatedAt: serverTimestamp()
