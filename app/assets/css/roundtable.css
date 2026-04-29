@@ -60,3 +60,9 @@ body,
 .home_text p {
   font-size: 14px!important;
 }
+.question-card {
+  margin-bottom: 16px;
+}
+.option-card {
+  margin-bottom: 8px;
+}
