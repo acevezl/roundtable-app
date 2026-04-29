@@ -77,6 +77,18 @@ export function useQuestions(roundtablePath) {
         console.error('Failed to toggle vote:', err)
         error.value = err
       }
+    },
+    deleteVotes: async (questionId, optionId) => {
+      const votesByOption = questionsCollection.documents.value[questionId].votesByOption || {}
+      delete votesByOption[optionId]
+      try {
+        await questionsCollection.update(questionId, {
+          votesByOption
+        })
+      } catch (err) {
+        console.error('Failed to remove vote:', err)
+        error.value = err
+      }
     }
   }
 

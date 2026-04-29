@@ -24,6 +24,7 @@ const {
   removeQuestion,
   editQuestionTitle,
   toggleVoteForOption,
+  deleteVotes,
 } = useQuestions(`roundtables/${roundtableId.value}`)
 const newTitle = ref('')
 function handleAdd() {
@@ -202,6 +203,7 @@ async function leaveRoundTable() {
                 @editQuestionTitle="(title) => editQuestionTitle(q.id, title)"
                 @removeQuestion="removeQuestion(q.id)"
                 @toggleVote="(optionId) => toggleVoteForOption(q.id, optionId)"
+                @removeOption="(optionId) => deleteVotes(q.id, optionId)"
               />
             </template>
           </div>
