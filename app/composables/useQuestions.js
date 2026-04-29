@@ -26,7 +26,7 @@ export function useQuestions(roundtablePath) {
         await questionsCollection.add({
           title,
           ownerId: uid,
-          votes: {},
+          votesByOption: {},
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         })
@@ -45,12 +45,35 @@ export function useQuestions(roundtablePath) {
     },
     editQuestionTitle: async (questionId, title) => {
       try {
-        await questionsCollection.update(questionId, { title })
+        await questionsCollection.update(questionId, {
+          title,
+          updatedAt: serverTimestamp()
+        })
       } catch (err) {
         console.error('Failed to edit question title:', err)
         error.value = err
       }
     },
+    toggleVoteForOption: async (questionId, optionId) => {
+      const auth = getAuth()
+      const uid = auth.currentUser?.uid
+      const votes = questionsCollection.documents.value[questionId].votesByOption || {}
+      if (!votes[optionId])
+        votes[optionId] = []
+      if (!votes[optionId].includes(uid))
+        votes[optionId].push(uid)
+      else
+        votes[optionId] = votes[optionId].filter(id => id !== uid)
+      try {
+        await questionsCollection.update(questionId, {
+          votesByOption: votes,
+          updatedAt: serverTimestamp()
+        })
+      } catch (err) {
+        console.error('Failed to toggle vote:', err)
+        error.value = err
+      }
+    }
   }
 
   return {
