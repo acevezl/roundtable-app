@@ -25,6 +25,7 @@ const {
   editQuestionTitle,
   toggleVoteForOption,
   deleteVotes,
+  setWinningOption,
 } = useQuestions(`roundtables/${roundtableId.value}`)
 const newTitle = ref('')
 function handleAdd() {
@@ -183,7 +184,6 @@ async function leaveRoundTable() {
             </div>
           </div>
 
-
           <div
             v-if="roundtable.description"
             class="mb-4"
@@ -205,6 +205,9 @@ async function leaveRoundTable() {
                 @toggleVote="(optionId) => toggleVoteForOption(q.id, optionId)"
                 @removeOption="(optionId) => deleteVotes(q.id, optionId)"
               />
+              <span v-if="q.winningVote">winning option Id: {{q.winningVote}}</span>
+              <span v-if="!q.winningVote">currently no winning option</span>
+              <button @click="setWinningOption(q.id, 'random')">Set winning vote</button>
             </template>
           </div>
           <div class="d-flex flex-wrap ga-2 mb-3">
