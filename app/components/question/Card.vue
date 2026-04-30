@@ -20,13 +20,6 @@ const {
   deleteVotes,
 } = useOptions(props.question.path)
 
-const newTitle = ref('')
-function handleAdd() {
-  addOption({
-    title: newTitle.value
-  })
-  newTitle.value = ''
-}
 const updatedTitle = ref('')
 function handleEditTitle() {
   emit('editQuestionTitle', updatedTitle.value)
@@ -43,8 +36,10 @@ const voteCount = computed(() => (optionId) => {
     <h3>{{ question.title }}</h3>
     <input v-model="updatedTitle" placeholder="new question title" />
     <button @click="handleEditTitle">Edit Question title</button>
-    <input v-model="newTitle" placeholder="Option title" />
-    <button @click="handleAdd">Add Option</button>
+    <InlineAdd
+      placeholder="Add option"
+      @submit="(title) => addOption({ title })"
+    />
     <button @click="emit('removeQuestion')">Remove Question</button>
     <ul>
       <li v-for="o in options" :key="o.id">

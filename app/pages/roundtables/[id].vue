@@ -27,13 +27,6 @@ const {
   deleteVotes,
   setWinningOption,
 } = useQuestions(`roundtables/${roundtableId.value}`)
-const newTitle = ref('')
-function handleAdd() {
-  addQuestion({
-    title: newTitle.value
-  })
-  newTitle.value = ''
-}
 
 onMounted(() => {
   roundtablesStore.watchRoundtable(roundtableId.value)
@@ -195,8 +188,10 @@ async function leaveRoundTable() {
           </div>
 
           <div>
-            <input v-model="newTitle" placeholder="Question title" />
-            <button @click="handleAdd">Add Question</button>
+            <InlineAdd
+              placeholder="Add question"
+              @submit="(title) => addQuestion({ title })"
+            />
             <template v-for="q in questions" :key="q.id">
               <QuestionCard
                 :question="q"
