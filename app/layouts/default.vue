@@ -25,7 +25,7 @@
         </v-app-bar>
 
         <v-main>
-            <v-container>
+            <v-container class="pa-1 pa-md-3">
                 <slot />
             </v-container>
         </v-main>

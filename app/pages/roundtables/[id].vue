@@ -102,7 +102,7 @@ async function leaveRoundTable() {
 </script>
 
 <template>
-  <v-container class="py-6">
+  <v-container class="pa-0 pa-md-6">
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
         <h1 class="text-h4">Round Table</h1>
@@ -137,7 +137,7 @@ async function leaveRoundTable() {
 
     <template v-if="roundtable">
       <v-card class="rt-card d-flex flex-column w-100">
-        <v-card-item class="rt-card-item">
+        <v-card-item class="rt-card-item pa-2 pa-md-4">
           <template #title>
             <div class="rt-card-header">
               <div class="rt-card-heading">
