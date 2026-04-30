@@ -32,7 +32,7 @@ function handleSubmit() {
 </script>
 
 <template>
-    <div class="inline-add d-inline-flex align-center">
+    <div class="inline-add d-inline-flex" style="vertical-align: middle">
         <v-btn
             v-if="!expanded"
             icon="mdi-plus"

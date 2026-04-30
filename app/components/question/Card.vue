@@ -45,6 +45,7 @@ const voteCount = computed(() => (optionId) => {
       variant="tonal"
       density="comfortable"
       aria-label="Delete question"
+      style="vertical-align: middle"
       @click="emit('removeQuestion')"
     />
     <ul>

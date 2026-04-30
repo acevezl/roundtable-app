@@ -20,6 +20,7 @@ const emit = defineEmits(['editOption', 'removeOption'])
       variant="tonal"
       density="comfortable"
       aria-label="Delete option"
+      style="vertical-align: middle"
       @click="emit('removeOption')"
     />
   </div>
