@@ -27,35 +27,37 @@ const voteCount = computed(() => (optionId) => {
 </script>
 
 <template>
-  <div>
-    <EditableTitle
-      :title="question.title"
-      placeholder="Question title"
-      @submit="(t) => emit('editQuestionTitle', t)"
-    >
-      <h3>{{ question.title }}</h3>
-    </EditableTitle>
-    Add option: <InlineAdd
-      placeholder="Add option"
-      @submit="(title) => addOption({ title })"
-    />
-    <v-btn
-      icon="mdi-delete"
-      size="small"
-      variant="tonal"
-      density="comfortable"
-      aria-label="Delete question"
-      style="vertical-align: middle"
-      @click="emit('removeQuestion')"
-    />
-    <ul>
-      <li v-for="o in options" :key="o.id">
-        <OptionCard :option="o"
-          @editOption="(title) => editOption(o.id, title)"
-          @removeOption="() => { removeOption(o.id); emit('removeOption', o.id) }"/>
-        Number of votes: {{voteCount(o.id)}}
-        <button @click="emit('toggleVote', o.id)">Toggle vote</button>
-      </li>
-    </ul>
-  </div>
+  <v-card class="mb-3" variant="outlined">
+    <v-card-text>
+      <EditableTitle
+        :title="question.title"
+        placeholder="Question title"
+        @submit="(t) => emit('editQuestionTitle', t)"
+      >
+        <h3>{{ question.title }}</h3>
+      </EditableTitle>
+      Add option: <InlineAdd
+        placeholder="Add option"
+        @submit="(title) => addOption({ title })"
+      />
+      <v-btn
+        icon="mdi-delete"
+        size="small"
+        variant="tonal"
+        density="comfortable"
+        aria-label="Delete question"
+        style="vertical-align: middle"
+        @click="emit('removeQuestion')"
+      />
+      <ul>
+        <li v-for="o in options" :key="o.id">
+          <OptionCard :option="o"
+            @editOption="(title) => editOption(o.id, title)"
+            @removeOption="() => { removeOption(o.id); emit('removeOption', o.id) }"/>
+          Number of votes: {{voteCount(o.id)}}
+          <button @click="emit('toggleVote', o.id)">Toggle vote</button>
+        </li>
+      </ul>
+    </v-card-text>
+  </v-card>
 </template>
