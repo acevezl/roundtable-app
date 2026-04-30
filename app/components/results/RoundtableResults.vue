@@ -18,7 +18,7 @@ const { questions } = useQuestions(`roundtables/${props.roundtableId}`)
     <v-alert v-if="questions.length === 0" type="info" variant="tonal">
       No questions were registered for this RoundTable.
     </v-alert>
-
+    <ResultsFinalDecision :questions="questions" />
     <v-row>
       <v-col
         v-for="q in questions"

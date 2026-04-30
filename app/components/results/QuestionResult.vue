@@ -8,22 +8,28 @@ const props = defineProps({
 
 const { options } = useOptions(props.question.path)
 
-const totalVotes = computed(() =>
-  options.value.reduce((sum, o) => sum + (o.voterIds?.length ?? 0), 0)
-)
+const totalVotes = computed(() => {
+  const votes = props.question.votesByOption || {}
+  return Object.values(votes).reduce((sum, arr) => sum + arr.length, 0)
+})
 
-const rankedOptions = computed(() =>
-  [...options.value]
-    .map((o) => ({
-      ...o,
-      votes: o.voterIds?.length ?? 0,
-      percentage:
-        totalVotes.value > 0
-          ? Math.round(((o.voterIds?.length ?? 0) / totalVotes.value) * 100)
-          : 0,
-    }))
+const rankedOptions = computed(() => {
+  const votes = props.question.votesByOption || {}
+  return [...options.value]
+    .map((o) => {
+      const optionVotes = votes[o.id]?.length ?? 0
+      return {
+        ...o,
+        votes: optionVotes,
+        percentage:
+          totalVotes.value > 0
+            ? Math.round((optionVotes / totalVotes.value) * 100)
+            : 0,
+      }
+    })
     .sort((a, b) => b.votes - a.votes)
-)
+})
+
 </script>
 
 <template>
