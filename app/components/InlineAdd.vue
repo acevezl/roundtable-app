@@ -53,10 +53,18 @@ function handleSubmit() {
             variant="outlined"
             hide-details
             autofocus
-            append-inner-icon="mdi-check"
-            @click:append-inner="handleSubmit"
             @keydown.enter.prevent="handleSubmit"
             @keydown.esc.prevent="collapse"
-        />
+            @blur="collapse"
+        >
+            <template #append-inner>
+                <v-icon
+                    icon="mdi-check"
+                    style="cursor: pointer"
+                    @mousedown.prevent
+                    @click="handleSubmit"
+                />
+            </template>
+        </v-text-field>
     </div>
 </template>
