@@ -39,7 +39,14 @@ const voteCount = computed(() => (optionId) => {
       placeholder="Add option"
       @submit="(title) => addOption({ title })"
     />
-    <button @click="emit('removeQuestion')">Remove Question</button>
+    <v-btn
+      icon="mdi-delete"
+      size="small"
+      variant="tonal"
+      density="comfortable"
+      aria-label="Delete question"
+      @click="emit('removeQuestion')"
+    />
     <ul>
       <li v-for="o in options" :key="o.id">
         <OptionCard :option="o"

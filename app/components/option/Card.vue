@@ -14,6 +14,13 @@ const emit = defineEmits(['editOption', 'removeOption'])
     >
       <span>{{ option.title }}</span>
     </EditableTitle>
-    <button @click="emit('removeOption')">Remove Option</button>
+    <v-btn
+      icon="mdi-delete"
+      size="small"
+      variant="tonal"
+      density="comfortable"
+      aria-label="Delete option"
+      @click="emit('removeOption')"
+    />
   </div>
 </template>
