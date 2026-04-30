@@ -188,7 +188,7 @@ async function leaveRoundTable() {
           </div>
 
           <div>
-            <InlineAdd
+            Add question: <InlineAdd
               placeholder="Add question"
               @submit="(title) => addQuestion({ title })"
             />
