@@ -4,7 +4,8 @@ import { useOptions } from '~/composables/useOptions'
 const emit = defineEmits([
   'editQuestionTitle',
   'removeQuestion',
-  'toggleVote'
+  'toggleVote',
+  'removeOption',
 ])
 
 const props = defineProps({
@@ -14,8 +15,9 @@ const props = defineProps({
 const { 
   options, 
   addOption, 
-  removeOption, 
+  removeOption,
   editOption,
+  deleteVotes,
 } = useOptions(props.question.path)
 
 const newTitle = ref('')
@@ -48,7 +50,7 @@ const voteCount = computed(() => (optionId) => {
       <li v-for="o in options" :key="o.id">
         <OptionCard :option="o"
           @editOption="(title) => editOption(o.id, title)"
-          @removeOption="removeOption(o.id)"/>
+          @removeOption="() => { removeOption(o.id); emit('removeOption', o.id) }"/>
         Number of votes: {{voteCount(o.id)}}
         <button @click="emit('toggleVote', o.id)">Toggle vote</button>
       </li>
