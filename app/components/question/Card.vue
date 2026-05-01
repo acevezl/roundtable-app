@@ -23,13 +23,13 @@ const voteCount = computed(() => (optionId) => {
 
 <template>
   <v-card class="mb-3" variant="outlined">
-    <v-card-text>
+    <v-card-text class="pa-1">
       <EditableTitle
         :title="question.title"
         placeholder="Question title"
         @submit="(t) => emit('editQuestionTitle', t)"
       >
-        <h3>{{ question.title }}</h3>
+        <h3 class="my-1">{{ question.title }}</h3>
       </EditableTitle>
       Add option:
       <InlineAdd
@@ -45,7 +45,7 @@ const voteCount = computed(() => (optionId) => {
         style="vertical-align: middle"
         @click="emit('removeQuestion')"
       />
-      <ul>
+      <ul class="pl-4">
         <li v-for="o in options" :key="o.id">
           <OptionCard
             :option="o"

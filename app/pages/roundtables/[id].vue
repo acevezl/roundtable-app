@@ -104,7 +104,7 @@ async function leaveRoundTable() {
     <div class="pa-2">
       <!-- RoundTable info -->
       <div class="rt-card-header">
-        <div v-if="roundtable" class="rt-card-heading">
+        <div v-if="roundtable" class="rt-card-heading mb-1">
           <div
             class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
           >
@@ -203,6 +203,11 @@ async function leaveRoundTable() {
           <v-btn color="secondary" variant="flat" @click="goBack"> Back </v-btn>
         </v-card-actions>
       </div>
+      Add question:
+      <InlineAdd
+        placeholder="Add question"
+        @submit="(title) => addQuestion({ title })"
+      />
     </div>
 
     <v-alert
@@ -221,8 +226,8 @@ async function leaveRoundTable() {
     />
 
     <template v-if="roundtable">
-      <v-card class="rt-card d-flex flex-column w-100">
-        <v-card-text class="pa-2">
+      <v-card class="rt-card d-flex flex-column w-100 px-2 py-0">
+        <v-card-text class="pa-0">
           <div v-if="roundtable.description" class="mb-4">
             <div class="text-subtitle-2 mb-2">Description</div>
             <div
@@ -233,11 +238,6 @@ async function leaveRoundTable() {
           </div>
 
           <div>
-            Add question:
-            <InlineAdd
-              placeholder="Add question"
-              @submit="(title) => addQuestion({ title })"
-            />
             <template v-for="q in questions" :key="q.id">
               <QuestionCard
                 :question="q"
