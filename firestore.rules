@@ -3,7 +3,6 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
-    //test
     // ROUNDTABLES
     match /roundtables/{docId} {
         // Questions
