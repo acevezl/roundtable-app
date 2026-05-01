@@ -103,7 +103,8 @@ async function leaveRoundTable() {
 
 <template>
   <v-container class="pa-0 pa-md-6">
-    <div class="rt-card-header mb-6">
+    <div class="pa-2"> <!-- RoundTable info -->
+    <div class="rt-card-header">
       <div
         v-if="roundtable"
         class="rt-card-heading"
@@ -111,7 +112,7 @@ async function leaveRoundTable() {
         <div
           class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
         >
-          <h1 class="text-h4">{{ roundtable.title }}</h1>
+          <h1 class="text-h4 pa-a my-0 my-md-3">{{ roundtable.title }}</h1>
 
           <v-chip
             size="x-small"
@@ -136,7 +137,7 @@ async function leaveRoundTable() {
       </div>
     </div>
 
-    <div class="d-flex flex-wrap align-center ga-2 mb-3">
+    <div class="d-flex flex-wrap align-center ga-2">
       <template v-if="roundtable">
         <v-chip
           v-if="isParticipant && !isOwner"
@@ -156,7 +157,7 @@ async function leaveRoundTable() {
           Join this round table to participate!
         </v-chip>
 
-        <div class="d-flex flex-wrap ga-2 mb-3">
+        <div class="d-flex flex-wrap ga-2">
           <v-chip size="small" variant="outlined">
             Owner: {{ roundtable.ownerName || 'Unknown user' }}
           </v-chip>
@@ -167,8 +168,8 @@ async function leaveRoundTable() {
         </div>
       </template>
     </div>
-    <div class="d-flex flex-wrap align-center ga-2 mb-3">
-      <v-card-actions>
+    <div class="d-flex flex-wrap align-center ga-2">
+      <v-card-actions class="ma-0 pa-0">
         <v-btn
           v-if="isOwner && roundtable.status == 'Open'"
           color="tertiary"
@@ -215,6 +216,7 @@ async function leaveRoundTable() {
         </v-btn>
         </v-card-actions>
     </div>
+  </div>
 
     <v-alert
       v-if="roundtablesStore.error"
@@ -233,7 +235,7 @@ async function leaveRoundTable() {
 
     <template v-if="roundtable">
       <v-card class="rt-card d-flex flex-column w-100">
-        <v-card-text>
+        <v-card-text class="pa-2">
           <div
             v-if="roundtable.description"
             class="mb-4"
