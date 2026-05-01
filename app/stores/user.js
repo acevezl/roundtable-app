@@ -88,7 +88,7 @@ export const useUserStore = defineStore('user', () => {
     if (result) {
       await sendVerificationEmail()
     }
-    
+
     return result
   }
 

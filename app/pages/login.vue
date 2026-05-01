@@ -20,9 +20,7 @@ const emailRules = [
   (v) => /.+@.+\..+/.test(v) || 'Enter a valid e-mail',
 ]
 
-const passwordRules = [
-  (v) => !!v || 'Password is required',
-]
+const passwordRules = [(v) => !!v || 'Password is required']
 
 const canSubmit = computed(() => !loading.value)
 
@@ -31,7 +29,11 @@ await userStore.initAuth()
 function getRedirectTarget() {
   const r = route.query.redirect
   if (typeof r === 'string' && r.startsWith('/')) return r
-  if (typeof userStore.afterLogin === 'string' && userStore.afterLogin.startsWith('/')) return userStore.afterLogin
+  if (
+    typeof userStore.afterLogin === 'string' &&
+    userStore.afterLogin.startsWith('/')
+  )
+    return userStore.afterLogin
   return '/roundtables'
 }
 
@@ -96,8 +98,8 @@ async function sendWelcomeEmail(email) {
     to: [email],
     message: {
       subject: 'Welcome to RoundTable',
-      html: `<p>Welcome to RoundTable.</p>`
-    }
+      html: `<p>Welcome to RoundTable.</p>`,
+    },
   })
 }
 </script>
@@ -114,7 +116,8 @@ async function sendWelcomeEmail(email) {
               Sign in to create and manage round tables.
             </p>
             <p class="mb-4 text-medium-emphasis">
-              <b>New user?</b> Just enter your email and password below, and smash the sign up button!
+              <b>New user?</b> Just enter your email and password below, and
+              smash the sign up button!
             </p>
 
             <v-alert
@@ -131,44 +134,44 @@ async function sendWelcomeEmail(email) {
               v-model="valid"
               @submit.prevent="submitSignInForm"
             >
-                <v-text-field
-                    v-model="form.email"
-                    label="E-mail"
-                    type="email"
-                    autocomplete="email"
-                    :rules="emailRules"
-                    variant="outlined"
-                    class="mb-3"
-                />
+              <v-text-field
+                v-model="form.email"
+                label="E-mail"
+                type="email"
+                autocomplete="email"
+                :rules="emailRules"
+                variant="outlined"
+                class="mb-3"
+              />
 
-                <v-text-field
-                    v-model="form.password"
-                    label="Password"
-                    type="password"
-                    autocomplete="current-password"
-                    :rules="passwordRules"
-                    variant="outlined"
-                    class="mb-4"
-                />
+              <v-text-field
+                v-model="form.password"
+                label="Password"
+                type="password"
+                autocomplete="current-password"
+                :rules="passwordRules"
+                variant="outlined"
+                class="mb-4"
+              />
 
-                <v-btn
-                    type="submit"
-                    color="primary"
-                    block
-                    :loading="loading"
-                    :disabled="!canSubmit"
-                >
-                    Sign in
-                </v-btn>
-                <v-btn
-                    variant="text"
-                    block
-                    class="mt-2"
-                    :disabled="loading"
-                    @click="submitSignUp"
-                    >
-                    Sign up
-                </v-btn>
+              <v-btn
+                type="submit"
+                color="primary"
+                block
+                :loading="loading"
+                :disabled="!canSubmit"
+              >
+                Sign in
+              </v-btn>
+              <v-btn
+                variant="text"
+                block
+                class="mt-2"
+                :disabled="loading"
+                @click="submitSignUp"
+              >
+                Sign up
+              </v-btn>
             </v-form>
           </v-card-text>
         </v-card>

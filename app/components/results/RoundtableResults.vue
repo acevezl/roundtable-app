@@ -20,13 +20,8 @@ const { questions } = useQuestions(`roundtables/${props.roundtableId}`)
     </v-alert>
     <ResultsFinalDecision :questions="questions" />
     <v-row>
-      <v-col
-        v-for="q in questions"
-        :key="q.id"
-        cols="12"
-        md="4"
-      >
-    <ResultsQuestionResult :question="q" />
+      <v-col v-for="q in questions" :key="q.id" cols="12" md="4">
+        <ResultsQuestionResult :question="q" />
       </v-col>
     </v-row>
   </div>

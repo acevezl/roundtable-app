@@ -1,10 +1,17 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref, reactive, nextTick } from 'vue'
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  ref,
+  reactive,
+  nextTick,
+} from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useRoundtablesStore } from '~/stores/roundtables'
 
 definePageMeta({
-  middleware: ['authenticated']
+  middleware: ['authenticated'],
 })
 
 const userStore = useUserStore()
@@ -35,9 +42,7 @@ function formatCreatedAt(value) {
   if (!value) return '—'
 
   const date =
-    typeof value?.toDate === 'function'
-      ? value.toDate()
-      : new Date(value)
+    typeof value?.toDate === 'function' ? value.toDate() : new Date(value)
 
   if (Number.isNaN(date.getTime())) return '—'
 
@@ -70,9 +75,7 @@ function isOwner(rt) {
 function isParticipant(rt) {
   const currentUserId = getCurrentUserId()
 
-  const ids = Array.isArray(rt?.participantIds)
-    ? rt.participantIds
-    : []
+  const ids = Array.isArray(rt?.participantIds) ? rt.participantIds : []
 
   return ids.includes(currentUserId)
 }
@@ -140,7 +143,7 @@ const createTitleRef = ref(null)
 
 const newRoundtable = reactive({
   title: '',
-  decision: ''
+  decision: '',
 })
 
 const displayRoundtables = computed(() => {
@@ -149,7 +152,7 @@ const displayRoundtables = computed(() => {
   if (creating.value) {
     list.unshift({
       id: '__creating__',
-      _isCreating: true
+      _isCreating: true,
     })
   }
 
@@ -182,7 +185,7 @@ async function createRoundtable() {
   try {
     await roundtablesStore.createRoundtable({
       title,
-      decision
+      decision,
     })
 
     cancelCreating()
@@ -199,7 +202,9 @@ async function deleteRoundtable(rt) {
   if (!rt?.id || deletingId.value) return
   if (!isOwner(rt)) return
 
-  const confirmed = window.confirm(`Delete "${rt.title}"? This cannot be undone.`)
+  const confirmed = window.confirm(
+    `Delete "${rt.title}"? This cannot be undone.`
+  )
   if (!confirmed) return
 
   deletingId.value = rt.id
@@ -219,14 +224,12 @@ async function deleteRoundtable(rt) {
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
         <h1 class="text-h4">My Round Tables</h1>
-        <p class="text-medium-emphasis">Create, share, and manage your decisions.</p>
+        <p class="text-medium-emphasis">
+          Create, share, and manage your decisions.
+        </p>
       </div>
 
-      <v-btn
-        color="tertiary"
-        :disabled="creating"
-        @click="startCreating"
-      >
+      <v-btn color="tertiary" :disabled="creating" @click="startCreating">
         <v-icon>mdi-plus-thick</v-icon>
       </v-btn>
     </div>
@@ -324,10 +327,7 @@ async function deleteRoundtable(rt) {
           </v-card-actions>
         </v-card>
 
-        <v-card
-          v-else
-          class="rt-card d-flex flex-column w-100 h-100"
-        >
+        <v-card v-else class="rt-card d-flex flex-column w-100 h-100">
           <v-card-item class="rt-card-item">
             <template #title>
               <div class="rt-card-header">
@@ -348,7 +348,9 @@ async function deleteRoundtable(rt) {
                     <template v-else>
                       <div
                         class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
-                        :class="{ 'rt-inline-editable--readonly': !isOwner(rt) }"
+                        :class="{
+                          'rt-inline-editable--readonly': !isOwner(rt),
+                        }"
                         @click="startEditTitle(rt)"
                       >
                         <span>{{ rt.title }}</span>
@@ -359,7 +361,11 @@ async function deleteRoundtable(rt) {
                           :color="rt.status === 'Open' ? 'success' : 'error'"
                         >
                           <v-icon size="14">
-                            {{ rt.status === 'Open' ? 'mdi-lock-open' : 'mdi-lock' }}
+                            {{
+                              rt.status === 'Open'
+                                ? 'mdi-lock-open'
+                                : 'mdi-lock'
+                            }}
                           </v-icon>
                           {{ rt.status }}
                         </v-chip>
@@ -381,10 +387,11 @@ async function deleteRoundtable(rt) {
 
                   <div class="rt-card-meta">
                     <span>Created: {{ formatCreatedAt(rt.createdAt) }}</span>
-                    <span>Last Update: {{ formatCreatedAt(rt.updatedAt) }}</span>
+                    <span
+                      >Last Update: {{ formatCreatedAt(rt.updatedAt) }}</span
+                    >
                   </div>
                 </div>
-
               </div>
             </template>
           </v-card-item>
@@ -406,7 +413,9 @@ async function deleteRoundtable(rt) {
             <template v-else>
               <div
                 class="rt-inline-editable rt-inline-editable--decision"
-                :class="{ 'rt-inline-editable--readonly': !isOwner(rt) }"
+                :class="{
+                  'rt-inline-editable--readonly': !isOwner(rt),
+                }"
                 @click="startEditDecision(rt)"
               >
                 {{ rt.decision }}
@@ -415,34 +424,24 @@ async function deleteRoundtable(rt) {
           </v-card-text>
 
           <v-card-actions>
-              <v-btn
-                v-if="isOwner(rt)"
-                color="primary"
-                variant="flat"
-                disabled
-              >
-                <v-icon start>mdi-crown</v-icon>
-                Owner
-              </v-btn>
+            <v-btn v-if="isOwner(rt)" color="primary" variant="flat" disabled>
+              <v-icon start>mdi-crown</v-icon>
+              Owner
+            </v-btn>
 
-              <v-btn
-                v-else-if="isParticipant(rt)"                
-                color="primary"
-                variant="flat"
-                disabled
-              >
-                <v-icon start>mdi-check</v-icon>
-                Joined
-              </v-btn>
-
+            <v-btn
+              v-else-if="isParticipant(rt)"
+              color="primary"
+              variant="flat"
+              disabled
+            >
+              <v-icon start>mdi-check</v-icon>
+              Joined
+            </v-btn>
 
             <v-spacer />
 
-            <v-btn
-              :to="`/roundtables/${rt.id}`"
-              color="primary"
-              variant="flat"
-            >
+            <v-btn :to="`/roundtables/${rt.id}`" color="primary" variant="flat">
               <v-icon>mdi-eye-outline</v-icon>
             </v-btn>
 
@@ -461,7 +460,9 @@ async function deleteRoundtable(rt) {
 
     <v-row v-else-if="creating" class="align-stretch">
       <v-col cols="12" md="6" lg="4" class="d-flex">
-        <v-card class="rt-card rt-card--creating d-flex flex-column w-100 h-100">
+        <v-card
+          class="rt-card rt-card--creating d-flex flex-column w-100 h-100"
+        >
           <v-card-item class="rt-card-item">
             <template #title>
               <div class="rt-card-header">

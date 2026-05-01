@@ -120,20 +120,20 @@ export async function emailVerification() {
 }
 
 export function getDB() {
-	if (!db) {
-		const firebaseApp = initApp()
-		const config = useRuntimeConfig()
-		const databaseId = config.public.firebaseDatabaseId
+  if (!db) {
+    const firebaseApp = initApp()
+    const config = useRuntimeConfig()
+    const databaseId = config.public.firebaseDatabaseId
 
-		db = databaseId
-			? getFirestore(firebaseApp, databaseId)
-			: getFirestore(firebaseApp)
+    db = databaseId
+      ? getFirestore(firebaseApp, databaseId)
+      : getFirestore(firebaseApp)
 
-		if (shouldUseEmulator() && !emulatorsConnected) {
-			connectFirestoreEmulator(db, '127.0.0.1', 8080)
-			emulatorsConnected = true
-		}
-	}
+    if (shouldUseEmulator() && !emulatorsConnected) {
+      connectFirestoreEmulator(db, '127.0.0.1', 8080)
+      emulatorsConnected = true
+    }
+  }
 
-	return db
+  return db
 }

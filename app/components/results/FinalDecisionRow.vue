@@ -8,8 +8,8 @@ const props = defineProps({
 
 const { options } = useOptions(props.question.path)
 
-const winner = computed(() =>
-  options.value.find((o) => o.id === props.question.winningVote) || null
+const winner = computed(
+  () => options.value.find((o) => o.id === props.question.winningVote) || null
 )
 </script>
 

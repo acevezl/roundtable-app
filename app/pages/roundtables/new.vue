@@ -5,7 +5,7 @@ import { useRoundtablesStore } from '~/stores/roundtables'
 import { useUserStore } from '~/stores/user'
 
 definePageMeta({
-  middleware: ['authenticated']
+  middleware: ['authenticated'],
 })
 
 const router = useRouter()
@@ -97,11 +97,7 @@ function resetForm() {
               {{ submitError }}
             </v-alert>
 
-            <v-form
-              ref="formRef"
-              v-model="valid"
-              @submit.prevent="submitForm"
-            >
+            <v-form ref="formRef" v-model="valid" @submit.prevent="submitForm">
               <v-text-field
                 v-model="form.title"
                 label="Title"
@@ -146,11 +142,7 @@ function resetForm() {
                   Create Round Table
                 </v-btn>
 
-                <v-btn
-                  variant="text"
-                  :disabled="saving"
-                  @click="resetForm"
-                >
+                <v-btn variant="text" :disabled="saving" @click="resetForm">
                   Reset
                 </v-btn>
 

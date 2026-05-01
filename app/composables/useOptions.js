@@ -24,8 +24,7 @@ export function useOptions(questionPath) {
     const auth = getAuth()
     const uid = auth.currentUser?.uid
     try {
-      if (!title)
-        throw new Error("titles cannot be empty")
+      if (!title) throw new Error('titles cannot be empty')
       await optionsCollection.add({
         title,
         ownerId: uid,
@@ -49,11 +48,10 @@ export function useOptions(questionPath) {
 
   async function editOption(optionId, title) {
     try {
-      if (!title)
-        throw new Error("titles cannot be empty")
+      if (!title) throw new Error('titles cannot be empty')
       await optionsCollection.update(optionId, {
         title,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       })
     } catch (err) {
       console.error('Failed to edit option:', err)
@@ -67,6 +65,6 @@ export function useOptions(questionPath) {
     addOption,
     removeOption,
     editOption,
-    path: optionsCollection.path
+    path: optionsCollection.path,
   }
 }

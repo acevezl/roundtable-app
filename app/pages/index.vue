@@ -12,7 +12,6 @@ onMounted(() => {
 const userStore = useUserStore()
 
 const isLoggedIn = computed(() => !!userStore.uid)
-
 </script>
 
 <template>
@@ -31,29 +30,26 @@ const isLoggedIn = computed(() => !!userStore.uid)
 
       <!-- RIGHT: TEXT -->
       <v-col cols="12" md="6" class="pl-md-10">
-
-        <div class="font-weight-bold mb-6">
-          Make decisions, not threads.
-        </div>
+        <div class="font-weight-bold mb-6">Make decisions, not threads.</div>
 
         <p class="text-body-1 mb-4">
           RoundTable is a shared space for group decisions.
         </p>
 
         <p class="text-body-2 mb-4">
-          Most group decisions get lost in messy chats, RoundTable brings a simple 
-          structure to help groups decide clearly together.
+          Most group decisions get lost in messy chats, RoundTable brings a
+          simple structure to help groups decide clearly together.
         </p>
 
         <p class="text-body-1 text-medium-emphasis mb-4">
-          You create a roundtable, invite others, and lay out options.
-          Each option is visible, comparable, and open to discussion.  
-          Nothing gets lost in a scroll.
+          You create a roundtable, invite others, and lay out options. Each
+          option is visible, comparable, and open to discussion. Nothing gets
+          lost in a scroll.
         </p>
 
         <p class="text-body-1 text-medium-emphasis mb-4">
-          When it’s time to decide, everyone votes. Results update in real time, and
-          everyone sees where things stand. Once voting closes, the outcome 
+          When it’s time to decide, everyone votes. Results update in real time,
+          and everyone sees where things stand. Once voting closes, the outcome
           is clear and shared by everyone.
         </p>
 
@@ -61,22 +57,12 @@ const isLoggedIn = computed(() => !!userStore.uid)
           RoundTable doesn’t try to replace conversation. It gives it shape so
           groups can move faster from talking to deciding.
         </p>
-        <br>
-        <v-btn
-          v-if="!isLoggedIn"
-          color="primary"
-          variant="flat"
-          to="/login"
-        >
+        <br />
+        <v-btn v-if="!isLoggedIn" color="primary" variant="flat" to="/login">
           Sign in
         </v-btn>
 
-        <v-btn
-          v-else
-          color="primary"
-          variant="flat"
-          to="/roundtables"
-        >
+        <v-btn v-else color="primary" variant="flat" to="/roundtables">
           Go to my round tables!
         </v-btn>
       </v-col>
