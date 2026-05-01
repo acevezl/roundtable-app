@@ -29,7 +29,6 @@ const rankedOptions = computed(() => {
     })
     .sort((a, b) => b.votes - a.votes)
 })
-
 </script>
 
 <template>
@@ -53,11 +52,7 @@ const rankedOptions = computed(() => {
         No options registered.
       </div>
 
-      <div
-        v-for="option in rankedOptions"
-        :key="option.id"
-        class="mb-3"
-      >
+      <div v-for="option in rankedOptions" :key="option.id" class="mb-3">
         <div class="d-flex justify-space-between align-center mb-1">
           <span>{{ option.title }}</span>
           <span class="text-body-2 text-medium-emphasis">

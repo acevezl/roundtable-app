@@ -2,7 +2,21 @@
 
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, limit, query, setDoc, where, onSnapshot, updateDoc } from 'firebase/firestore'
+import {
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  query,
+  setDoc,
+  where,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore'
 import { getDB } from '~/services/fireinit'
 import { useUserStore } from '~/stores/user'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
@@ -19,8 +33,8 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
   const currentRoundtableLoading = ref(false)
   let unwatchCurrentRoundtableRef = null
 
-  const error = computed(() =>
-    ownedCollection.error.value || joinedCollection.error.value || ''
+  const error = computed(
+    () => ownedCollection.error.value || joinedCollection.error.value || ''
   )
 
   const roundtables = computed(() => {
@@ -45,7 +59,9 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
     ownedCollection.subscribe()
 
     joinedCollection.setPath('roundtables')
-    joinedCollection.setFilter([['participantIds', 'array-contains', userStore.uid]])
+    joinedCollection.setFilter([
+      ['participantIds', 'array-contains', userStore.uid],
+    ])
     joinedCollection.subscribe()
   }
 
@@ -187,11 +203,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
         if (isActive && notExpired) {
           shareCode = existingInvite.id
         } else {
-          await deleteDoc(
-            doc(getDB(),
-            'roundtableInvites',
-            existingInvite.id
-          ))
+          await deleteDoc(doc(getDB(), 'roundtableInvites', existingInvite.id))
         }
       }
 
@@ -201,13 +213,12 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
 
       const url = `${window.location.origin}/join/${shareCode}`
 
-      if (navigator.share){
-        await navigator.share({url})
+      if (navigator.share) {
+        await navigator.share({ url })
       } else {
         await navigator.clipboard.writeText(url)
         alert('Round table link copied to clipboard')
       }
-
     } catch (e) {
       console.error('Error sharing round table:', e)
     } finally {
@@ -231,10 +242,9 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
 
   // Retrieves the active RT invite
   async function getActiveInviteForRoundTable(roundtableId) {
-    
-    const q = query (
+    const q = query(
       collection(getDB(), 'roundtableInvites'),
-      where('roundtableId','==', roundtableId),
+      where('roundtableId', '==', roundtableId),
       limit(1)
     )
 
@@ -252,20 +262,18 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
 
   async function createInviteForRoundTable(rt) {
     const now = new Date()
-    const expiresAt = addHours(now, 24) 
+    const expiresAt = addHours(now, 24)
     const shareCode = makeShareCode(10)
 
-    await setDoc(doc(getDB(), 'roundtableInvites', shareCode),
-      {
-        roundtableId: rt.id,
-        ownerId: rt.ownerId,
-        title: rt.title,
-        status: 'active',
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-        expiresAt: expiresAt.toISOString(),
-      }
-    )
+    await setDoc(doc(getDB(), 'roundtableInvites', shareCode), {
+      roundtableId: rt.id,
+      ownerId: rt.ownerId,
+      title: rt.title,
+      status: 'active',
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+    })
 
     return shareCode
   }

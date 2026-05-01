@@ -7,7 +7,7 @@ import { useRoundtablesStore } from '~/stores/roundtables'
 import { useQuestions } from '~/composables/useQuestions'
 
 definePageMeta({
-  middleware: ['authenticated']
+  middleware: ['authenticated'],
 })
 
 const route = useRoute()
@@ -67,15 +67,13 @@ function formatDate(value) {
   if (!value) return '—'
 
   const date =
-    typeof value?.toDate === 'function'
-      ? value.toDate()
-      : new Date(value)
+    typeof value?.toDate === 'function' ? value.toDate() : new Date(value)
 
   if (Number.isNaN(date.getTime())) return '—'
 
   return new Intl.DateTimeFormat('en-GB', {
     dateStyle: 'medium',
-    timeStyle: 'short'
+    timeStyle: 'short',
   }).format(date)
 }
 
@@ -102,22 +100,109 @@ async function leaveRoundTable() {
 </script>
 
 <template>
-  <v-container class="py-6">
-    <div class="d-flex justify-space-between align-center mb-6">
-      <div>
-        <h1 class="text-h4">Round Table</h1>
-        <p class="text-medium-emphasis mb-0">
-          Review this decision and join if you want to participate.
-        </p>
+  <v-container class="pa-0 pa-md-6">
+    <div class="pa-2">
+      <!-- RoundTable info -->
+      <div class="rt-card-header">
+        <div v-if="roundtable" class="rt-card-heading">
+          <div
+            class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
+          >
+            <h1 class="text-h4 pa-a my-0 my-md-3">
+              {{ roundtable.title }}
+            </h1>
+
+            <v-chip
+              size="x-small"
+              variant="tonal"
+              :color="roundtable.status === 'Open' ? 'success' : 'error'"
+            >
+              <v-icon size="14">
+                {{
+                  roundtable.status === 'Open' ? 'mdi-lock-open' : 'mdi-lock'
+                }}
+              </v-icon>
+              {{ roundtable.status }}
+            </v-chip>
+          </div>
+
+          <div
+            class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly"
+          >
+            {{ roundtable.decision || 'No decision text provided.' }}
+          </div>
+
+          <div class="rt-card-meta">
+            <span>Created: {{ formatDate(roundtable.createdAt) }}</span>
+            <span>Last update: {{ formatDate(roundtable.updatedAt) }}</span>
+          </div>
+        </div>
       </div>
 
-      <v-btn
-        color="secondary"
-        variant="flat"
-        @click="goBack"
-      >
-        Back
-      </v-btn>
+      <div class="d-flex flex-wrap align-center ga-2">
+        <template v-if="roundtable">
+          <v-chip
+            v-if="isParticipant && !isOwner"
+            size="small"
+            color="primary"
+            variant="tonal"
+          >
+            You joined this round table
+          </v-chip>
+
+          <v-chip
+            v-else-if="!isOwner"
+            size="small"
+            color="warning"
+            variant="tonal"
+          >
+            Join this round table to participate!
+          </v-chip>
+
+          <div class="d-flex flex-wrap ga-2">
+            <v-chip size="small" variant="outlined">
+              Owner: {{ roundtable.ownerName || 'Unknown user' }}
+            </v-chip>
+
+            <v-chip size="small" variant="outlined">
+              Participants: {{ participantIds.length }}
+            </v-chip>
+          </div>
+        </template>
+      </div>
+      <div class="d-flex flex-wrap align-center ga-2">
+        <v-card-actions class="ma-0 pa-0">
+          <v-btn
+            v-if="isOwner && roundtable.status == 'Open'"
+            color="tertiary"
+            variant="flat"
+            size="small"
+            @click="shareRoundtable(roundtable)"
+          >
+            <v-icon start>mdi-share-variant</v-icon>
+            Share
+          </v-btn>
+          <v-btn v-if="isParticipant" color="primary" variant="flat" disabled>
+            <v-icon start>mdi-check</v-icon>
+            Joined
+          </v-btn>
+          <v-btn v-else-if="isOwner" color="primary" variant="flat" disabled>
+            <v-icon start>mdi-crown</v-icon>
+            Owner
+          </v-btn>
+          <v-btn
+            v-if="isParticipant && !isOwner"
+            color="secondary"
+            variant="outlined"
+            :loading="roundtablesStore.loading"
+            @click="leaveRoundTable"
+          >
+            <v-icon start>mdi-account-remove</v-icon>
+            Leave
+          </v-btn>
+          <v-btn color="secondary" variant="flat" @click="goBack"> Back </v-btn>
+        </v-card-actions>
+      </div>
     </div>
 
     <v-alert
@@ -137,58 +222,19 @@ async function leaveRoundTable() {
 
     <template v-if="roundtable">
       <v-card class="rt-card d-flex flex-column w-100">
-        <v-card-item class="rt-card-item">
-          <template #title>
-            <div class="rt-card-header">
-              <div class="rt-card-heading">
-                <div
-                  class="rt-inline-editable rt-inline-editable--title d-flex align-center justify-space-between"
-                >
-                  <span>{{ roundtable.title }}</span>
-
-                  <v-chip
-                    size="x-small"
-                    variant="tonal"
-                    :color="roundtable.status === 'Open' ? 'success' : 'error'"
-                  >
-                    <v-icon size="14">
-                      {{ roundtable.status === 'Open' ? 'mdi-lock-open' : 'mdi-lock' }}
-                    </v-icon>
-                    {{ roundtable.status }}
-                  </v-chip>
-                </div>
-
-                <div class="rt-card-meta">
-                  <span>Created: {{ formatDate(roundtable.createdAt) }}</span>
-                  <span>Last update: {{ formatDate(roundtable.updatedAt) }}</span>
-                </div>
-              </div>
-
-              
-            </div>
-          </template>
-        </v-card-item>
-
-        <v-card-text class="pt-0">
-          <div class="mb-4">
-            <div class="text-subtitle-2 mb-2">Decision</div>
-            <div class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly">
-              {{ roundtable.decision || 'No decision text provided.' }}
-            </div>
-          </div>
-
-          <div
-            v-if="roundtable.description"
-            class="mb-4"
-          >
+        <v-card-text class="pa-2">
+          <div v-if="roundtable.description" class="mb-4">
             <div class="text-subtitle-2 mb-2">Description</div>
-            <div class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly">
+            <div
+              class="rt-inline-editable rt-inline-editable--description rt-inline-editable--readonly"
+            >
               {{ roundtable.description }}
             </div>
           </div>
 
           <div>
-            Add question: <InlineAdd
+            Add question:
+            <InlineAdd
               placeholder="Add question"
               @submit="(title) => addQuestion({ title })"
             />
@@ -200,102 +246,21 @@ async function leaveRoundTable() {
                 @toggleVote="(optionId) => toggleVoteForOption(q.id, optionId)"
                 @removeOption="(optionId) => deleteVotes(q.id, optionId)"
               />
-              <span v-if="q.winningVote">winning option Id: {{q.winningVote}}</span>
+              <span v-if="q.winningVote"
+                >winning option Id: {{ q.winningVote }}</span
+              >
               <span v-if="!q.winningVote">currently no winning option</span>
-              <button @click="setWinningOption(q.id, 'random')">Set winning vote</button>
+              <button @click="setWinningOption(q.id, 'random')">
+                Set winning vote
+              </button>
             </template>
           </div>
-          <div class="d-flex flex-wrap ga-2 mb-3">
-            <v-chip size="small" variant="outlined">
-              Owner: {{ roundtable.ownerName || 'Unknown user' }}
-            </v-chip>
-
-            <v-chip size="small" variant="outlined">
-              Participants: {{ participantIds.length }}
-            </v-chip>
-          </div>
-
-          <div class="d-flex flex-wrap ga-2">
-            <v-chip
-              v-if="isOwner"
-              size="small"
-              color="primary"
-              variant="tonal"
-            >
-              You are the owner
-            </v-chip>
-
-            <v-chip
-              v-else-if="isParticipant"
-              size="small"
-              color="primary"
-              variant="tonal"
-            >
-              You joined this round table
-            </v-chip>
-
-            <v-chip
-              v-else
-              size="small"
-              color="warning"
-              variant="tonal"
-            >
-              Join this round table to participate!
-            </v-chip>
-          </div>
         </v-card-text>
-
-        <v-card-actions>
-
-          <v-btn
-            v-if="isParticipant"
-            color="primary"
-            variant="flat"
-            disabled
-          >
-            <v-icon start>mdi-check</v-icon>
-            Joined
-          </v-btn>
-
-          <v-btn
-            v-else-if="isOwner"
-            color="primary"
-            variant="flat"
-            disabled
-          >
-            <v-icon start>mdi-crown</v-icon>
-            Owner
-          </v-btn>
-
-          <v-spacer />
-
-          <v-btn
-            v-if="isParticipant && !isOwner"
-            color="secondary"
-            variant="outlined"
-            :loading="roundtablesStore.loading"
-            @click="leaveRoundTable"
-          >
-            <v-icon start>mdi-account-remove</v-icon>
-            Leave
-          </v-btn>
-
-          <v-btn
-            v-if="isOwner && roundtable.status == 'Open'"
-            color="tertiary"
-            variant="flat"
-            @click="shareRoundtable(roundtable)"
-          >
-            <v-icon start>mdi-share-variant</v-icon>
-            Share
-          </v-btn>
-        </v-card-actions>
       </v-card>
       <ResultsRoundtableResults
         v-if="roundtable.status === 'closed'"
         :roundtable-id="roundtableId"
       />
-      
     </template>
 
     <v-alert

@@ -13,8 +13,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo({
       path: '/login',
       query: {
-        redirect: redirectTarget
-      }
+        redirect: redirectTarget,
+      },
     })
   }
 })

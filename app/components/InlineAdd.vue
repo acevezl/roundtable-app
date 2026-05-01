@@ -2,7 +2,7 @@
 import { ref, nextTick } from 'vue'
 
 defineProps({
-    placeholder: { type: String, default: 'Add' },
+  placeholder: { type: String, default: 'Add' },
 })
 
 const emit = defineEmits(['submit'])
@@ -12,59 +12,59 @@ const text = ref('')
 const fieldRef = ref(null)
 
 async function expand() {
-    expanded.value = true
-    await nextTick()
-    fieldRef.value?.focus?.()
+  expanded.value = true
+  await nextTick()
+  fieldRef.value?.focus?.()
 }
 
 function collapse() {
-    expanded.value = false
-    text.value = ''
+  expanded.value = false
+  text.value = ''
 }
 
 function handleSubmit() {
-    const value = text.value.trim()
-    if (value) {
-        emit('submit', value)
-    }
-    collapse()
+  const value = text.value.trim()
+  if (value) {
+    emit('submit', value)
+  }
+  collapse()
 }
 </script>
 
 <template>
-    <div class="inline-add d-inline-flex align-center">
-        <v-btn
-            v-if="!expanded"
-            icon="mdi-plus"
-            size="small"
-            variant="tonal"
-            density="comfortable"
-            :aria-label="placeholder"
-            @click="expand"
-        />
+  <div class="inline-add d-inline-flex" style="vertical-align: middle">
+    <v-btn
+      v-if="!expanded"
+      icon="mdi-plus"
+      size="small"
+      variant="tonal"
+      density="comfortable"
+      :aria-label="placeholder"
+      @click="expand"
+    />
 
-        <v-text-field
-            v-else
-            ref="fieldRef"
-            v-model="text"
-            :placeholder="placeholder"
-            :aria-label="placeholder"
-            density="compact"
-            variant="outlined"
-            hide-details
-            autofocus
-            @keydown.enter.prevent="handleSubmit"
-            @keydown.esc.prevent="collapse"
-            @blur="collapse"
-        >
-            <template #append-inner>
-                <v-icon
-                    icon="mdi-check"
-                    style="cursor: pointer"
-                    @mousedown.prevent
-                    @click="handleSubmit"
-                />
-            </template>
-        </v-text-field>
-    </div>
+    <v-text-field
+      v-else
+      ref="fieldRef"
+      v-model="text"
+      :placeholder="placeholder"
+      :aria-label="placeholder"
+      density="compact"
+      variant="outlined"
+      hide-details
+      autofocus
+      @keydown.enter.prevent="handleSubmit"
+      @keydown.esc.prevent="collapse"
+      @blur="collapse"
+    >
+      <template #append-inner>
+        <v-icon
+          icon="mdi-check"
+          style="cursor: pointer"
+          @mousedown.prevent
+          @click="handleSubmit"
+        />
+      </template>
+    </v-text-field>
+  </div>
 </template>

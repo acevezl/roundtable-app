@@ -5,7 +5,9 @@ import { ref, computed, onUnmounted } from 'vue'
 
 export function useQuestions(roundtablePath) {
   const error = ref(null)
-  const questionsCollection = useFirestoreCollection(`${roundtablePath}/questions`)
+  const questionsCollection = useFirestoreCollection(
+    `${roundtablePath}/questions`
+  )
   const questions = computed(() => {
     return questionsCollection.docsArray.value || []
   })
@@ -21,8 +23,7 @@ export function useQuestions(roundtablePath) {
   const questionsAPI = {
     addQuestion: async ({ title }) => {
       try {
-        if (!title)
-          throw new Error("titles cannot be empty")
+        if (!title) throw new Error('titles cannot be empty')
         const auth = getAuth()
         const uid = auth.currentUser?.uid
         await questionsCollection.add({
@@ -31,7 +32,7 @@ export function useQuestions(roundtablePath) {
           votesByOption: {},
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          winningVote: null
+          winningVote: null,
         })
       } catch (err) {
         console.error('Failed to add question:', err)
@@ -48,11 +49,10 @@ export function useQuestions(roundtablePath) {
     },
     editQuestionTitle: async (questionId, title) => {
       try {
-        if (!title)
-          throw new Error("titles cannot be empty")
+        if (!title) throw new Error('titles cannot be empty')
         await questionsCollection.update(questionId, {
           title,
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         })
       } catch (err) {
         console.error('Failed to edit question title:', err)
@@ -62,17 +62,15 @@ export function useQuestions(roundtablePath) {
     toggleVoteForOption: async (questionId, optionId) => {
       const auth = getAuth()
       const uid = auth.currentUser?.uid
-      const votes = questionsCollection.documents.value[questionId].votesByOption || {}
-      if (!votes[optionId])
-        votes[optionId] = []
-      if (!votes[optionId].includes(uid))
-        votes[optionId].push(uid)
-      else
-        votes[optionId] = votes[optionId].filter(id => id !== uid)
+      const votes =
+        questionsCollection.documents.value[questionId].votesByOption || {}
+      if (!votes[optionId]) votes[optionId] = []
+      if (!votes[optionId].includes(uid)) votes[optionId].push(uid)
+      else votes[optionId] = votes[optionId].filter((id) => id !== uid)
       try {
         await questionsCollection.update(questionId, {
           votesByOption: votes,
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         })
       } catch (err) {
         console.error('Failed to toggle vote:', err)
@@ -80,11 +78,12 @@ export function useQuestions(roundtablePath) {
       }
     },
     deleteVotes: async (questionId, optionId) => {
-      const votesByOption = questionsCollection.documents.value[questionId].votesByOption || {}
+      const votesByOption =
+        questionsCollection.documents.value[questionId].votesByOption || {}
       delete votesByOption[optionId]
       try {
         await questionsCollection.update(questionId, {
-          votesByOption
+          votesByOption,
         })
       } catch (err) {
         console.error('Failed to remove vote:', err)
@@ -92,12 +91,12 @@ export function useQuestions(roundtablePath) {
       }
     },
     setWinningOption: async (questionId, tiebreak, optionArray = []) => {
-      if (!tiebreak)
-        tiebreak = 'none'
+      if (!tiebreak) tiebreak = 'none'
       //tiebreak: priority, random, none
-      const votesByOption = questionsCollection.documents.value[questionId].votesByOption || {}
-      let highestVote = 0;
-      const winningOptions = [];
+      const votesByOption =
+        questionsCollection.documents.value[questionId].votesByOption || {}
+      let highestVote = 0
+      const winningOptions = []
       for (const optionId in votesByOption) {
         if (votesByOption[optionId].length > highestVote)
           highestVote = votesByOption[optionId].length
@@ -110,44 +109,45 @@ export function useQuestions(roundtablePath) {
       }
       let foundOption
       if (winningOptions.length == 0) {
-        console.log("no votes")
-        foundOption = ""
+        console.log('no votes')
+        foundOption = ''
       } else if (winningOptions.length == 1 || tiebreak == 'none') {
-        console.log("one winning vote found")
+        console.log('one winning vote found')
         foundOption = winningOptions[0]
       } else if (tiebreak == 'random') {
-        console.log("multiple winning votes found; choosing at random")
+        console.log('multiple winning votes found; choosing at random')
         function hash(seed, max) {
-          let h = 0;
+          let h = 0
           for (let i = 0; i < seed.length; i++) {
-            h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+            h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0
           }
-          return (h >>> 0) % (max);
+          return (h >>> 0) % max
         }
         const chosen = hash(questionId, winningOptions.length)
         foundOption = winningOptions[chosen]
       } else if (tiebreak == 'priority') {
-        console.log("multiple winning votes found; choosing by prio")
-        foundOption = optionArray.find(item => winningOptions.includes(item)) || ""
+        console.log('multiple winning votes found; choosing by prio')
+        foundOption =
+          optionArray.find((item) => winningOptions.includes(item)) || ''
       }
-      if (foundOption == "") {
-        console.warn("No winning vote found for question " + questionId)
+      if (foundOption == '') {
+        console.warn('No winning vote found for question ' + questionId)
       }
       try {
         await questionsCollection.update(questionId, {
-          winningVote: foundOption
+          winningVote: foundOption,
         })
       } catch (err) {
         console.error('Failed to set winning option:', err)
         error.value = err
       }
-    }
+    },
   }
 
   return {
     questions,
     error,
     ...questionsAPI,
-    path: questionsCollection.path
+    path: questionsCollection.path,
   }
 }

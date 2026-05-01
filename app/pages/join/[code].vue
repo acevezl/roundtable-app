@@ -7,7 +7,7 @@ import { getDB } from '~/services/fireinit'
 import { useUserStore } from '~/stores/user'
 
 definePageMeta({
-  middleware: ['authenticated']
+  middleware: ['authenticated'],
 })
 
 const userStore = useUserStore()
@@ -21,7 +21,6 @@ const invite = ref(null)
 const loading = ref(false)
 const loadError = ref('')
 
-
 function goBack() {
   router.push('/roundtables')
 }
@@ -30,15 +29,13 @@ function formatDate(value) {
   if (!value) return '—'
 
   const date =
-    typeof value?.toDate === 'function'
-      ? value.toDate()
-      : new Date(value)
+    typeof value?.toDate === 'function' ? value.toDate() : new Date(value)
 
   if (Number.isNaN(date.getTime())) return '—'
 
   return new Intl.DateTimeFormat('en-GB', {
     dateStyle: 'medium',
-    timeStyle: 'short'
+    timeStyle: 'short',
   }).format(date)
 }
 
@@ -56,11 +53,9 @@ async function loadInviteByCode(code) {
   const expired =
     loadedInvite.status !== 'active' ||
     !loadedInvite.expiresAt ||
-    (
-      typeof loadedInvite.expiresAt?.toDate === 'function'
-        ? loadedInvite.expiresAt.toDate()
-        : new Date(loadedInvite.expiresAt)
-    ) <= new Date()
+    (typeof loadedInvite.expiresAt?.toDate === 'function'
+      ? loadedInvite.expiresAt.toDate()
+      : new Date(loadedInvite.expiresAt)) <= new Date()
 
   if (expired) return null
 
@@ -114,7 +109,6 @@ onMounted(async () => {
         return
       }
     }
-
   } catch (e) {
     console.error('Failed to load invite:', e)
     invite.value = null
@@ -135,13 +129,7 @@ onMounted(async () => {
         </p>
       </div>
 
-      <v-btn
-        color="secondary"
-        variant="flat"
-        @click="goBack"
-      >
-        Back
-      </v-btn>
+      <v-btn color="secondary" variant="flat" @click="goBack"> Back </v-btn>
     </div>
 
     <v-alert
@@ -153,20 +141,11 @@ onMounted(async () => {
       {{ roundtablesStore.error }}
     </v-alert>
 
-    <v-alert
-      v-if="loadError"
-      type="error"
-      variant="tonal"
-      class="mb-4"
-    >
+    <v-alert v-if="loadError" type="error" variant="tonal" class="mb-4">
       {{ loadError }}
     </v-alert>
 
-    <v-progress-linear
-      v-if="loading && !invite"
-      indeterminate
-      class="mb-4"
-    />
+    <v-progress-linear v-if="loading && !invite" indeterminate class="mb-4" />
 
     <template v-if="invite">
       <v-card class="rt-card d-flex flex-column w-100">
@@ -199,11 +178,7 @@ onMounted(async () => {
           </div>
 
           <div class="d-flex flex-wrap ga-2">
-            <v-chip
-              size="small"
-              color="warning"
-              variant="tonal"
-            >
+            <v-chip size="small" color="warning" variant="tonal">
               Join this round table to participate!
             </v-chip>
           </div>
@@ -224,11 +199,7 @@ onMounted(async () => {
       </v-card>
     </template>
 
-    <v-alert
-      v-else-if="!loading"
-      type="warning"
-      variant="tonal"
-    >
+    <v-alert v-else-if="!loading" type="warning" variant="tonal">
       Invite not found, expired, or you do not have access to it.
     </v-alert>
   </v-container>
