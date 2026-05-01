@@ -244,14 +244,8 @@ async function leaveRoundTable() {
                 @removeQuestion="removeQuestion(q.id)"
                 @toggleVote="(optionId) => toggleVoteForOption(q.id, optionId)"
                 @removeOption="(optionId) => deleteVotes(q.id, optionId)"
+                @setWinningVote="(optionId) => setWinningOption(q.id, optionId)"
               />
-              <span v-if="q.winningVote"
-                >winning option Id: {{ q.winningVote }}</span
-              >
-              <span v-if="!q.winningVote">currently no winning option</span>
-              <button @click="setWinningOption(q.id, 'random')">
-                Set winning vote
-              </button>
             </template>
           </div>
         </v-card-text>
