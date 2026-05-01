@@ -1,12 +1,13 @@
 <script setup>
 defineProps({
   option: { type: Object, required: true },
+  voted: { type: Boolean, default: false },
 })
-const emit = defineEmits(['editOption', 'removeOption'])
+const emit = defineEmits(['editOption', 'removeOption', 'toggleVote'])
 </script>
 
 <template>
-  <div>
+  <div class="d-flex align-center ga-2">
     <EditableTitle
       :title="option.title"
       placeholder="Option title"
@@ -20,8 +21,16 @@ const emit = defineEmits(['editOption', 'removeOption'])
       variant="tonal"
       density="comfortable"
       aria-label="Delete option"
-      style="vertical-align: middle"
       @click="emit('removeOption')"
+    />
+    <v-btn
+      :icon="voted ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'"
+      :color="voted ? 'success' : undefined"
+      size="small"
+      variant="tonal"
+      density="comfortable"
+      aria-label="Toggle vote"
+      @click="emit('toggleVote')"
     />
   </div>
 </template>

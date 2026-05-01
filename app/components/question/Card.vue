@@ -1,5 +1,6 @@
 <script setup>
 import { useOptions } from '~/composables/useOptions'
+import { useUserStore } from '~/stores/user'
 
 const emit = defineEmits([
   'editQuestionTitle',
@@ -12,6 +13,8 @@ const props = defineProps({
   question: { type: Object, required: true },
 })
 
+const userStore = useUserStore()
+
 const { options, addOption, removeOption, editOption, deleteVotes } =
   useOptions(props.question.path)
 
@@ -19,6 +22,11 @@ const voteCount = computed(() => (optionId) => {
   const votes = props.question.votesByOption || {}
   return votes[optionId] != null ? votes[optionId].length : 0
 })
+
+const hasVoted = (optionId) => {
+  const voters = props.question.votesByOption?.[optionId]
+  return Array.isArray(voters) && voters.includes(userStore.uid)
+}
 </script>
 
 <template>
@@ -49,7 +57,9 @@ const voteCount = computed(() => (optionId) => {
         <li v-for="o in options" :key="o.id">
           <OptionCard
             :option="o"
+            :voted="hasVoted(o.id)"
             @editOption="(title) => editOption(o.id, title)"
+            @toggleVote="emit('toggleVote', o.id)"
             @removeOption="
               () => {
                 removeOption(o.id)
@@ -58,7 +68,6 @@ const voteCount = computed(() => (optionId) => {
             "
           />
           Number of votes: {{ voteCount(o.id) }}
-          <button @click="emit('toggleVote', o.id)">Toggle vote</button>
         </li>
       </ul>
     </v-card-text>
