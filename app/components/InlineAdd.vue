@@ -47,6 +47,7 @@ function handleSubmit() {
       v-else
       ref="fieldRef"
       v-model="text"
+      class="inline-add__field"
       :placeholder="placeholder"
       :aria-label="placeholder"
       density="compact"

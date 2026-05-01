@@ -176,7 +176,6 @@ async function leaveRoundTable() {
             v-if="isOwner && roundtable.status == 'Open'"
             color="tertiary"
             variant="flat"
-            size="small"
             @click="shareRoundtable(roundtable)"
           >
             <v-icon start>mdi-share-variant</v-icon>

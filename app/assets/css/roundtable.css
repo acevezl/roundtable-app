@@ -66,3 +66,8 @@ body,
 .option-card {
   margin-bottom: 8px;
 }
+.inline-add__field {
+  max-width: 200px;
+  min-width: 180px;
+  max-width: 320px;
+}
