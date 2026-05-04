@@ -120,16 +120,6 @@ const winningOptionTitle = computed(() => {
               No winning option set yet
             </span>
           </div>
-
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="success"
-            @click="emit('setWinningVote')"
-          >
-            <v-icon start size="small">mdi-check-circle</v-icon>
-            Set winner
-          </v-btn>
         </div>
       </div>
 
