@@ -228,7 +228,7 @@ async function leaveRoundTable(rt) {
         
       </div>
       <ResultsRoundtableResults
-        v-if="roundtable.status.toLowerCase() === 'closed'"
+        v-if="roundtable?.status?.toLowerCase() === 'closed'"
         :roundtable-id="roundtableId"
       />
       <template v-if="roundtable && roundtable.status.toLowerCase() !== 'closed'">
