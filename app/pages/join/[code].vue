@@ -21,6 +21,9 @@ const invite = ref(null)
 const loading = ref(false)
 const loadError = ref('')
 
+const joining = ref(false)
+const joinError = ref('')
+
 function goBack() {
   router.push('/roundtables')
 }
@@ -63,14 +66,20 @@ async function loadInviteByCode(code) {
 }
 
 async function joinRoundtable() {
-  if (!invite.value?.roundtableId) return
+	if (!invite.value?.roundtableId) return
 
-  try {
-    await roundtablesStore.subscribeToRoundtable(invite.value.roundtableId)
-    await router.replace(`/roundtables/${invite.value.roundtableId}`)
-  } catch (e) {
-    console.error('Join failed:', e)
-  }
+	joining.value = true
+	joinError.value = ''
+
+	try {
+		await roundtablesStore.subscribeToRoundtable(invite.value.roundtableId)
+		await router.replace(`/roundtables/${invite.value.roundtableId}`)
+	} catch (e) {
+		console.error('Join failed:', e)
+		joinError.value = 'Could not join this round table.'
+	} finally {
+		joining.value = false
+	}
 }
 
 onMounted(async () => {
@@ -95,20 +104,29 @@ onMounted(async () => {
 
     // If the user has already joined the roundtable linked to this invite,
     // do not show the invite, send them directly to watch the roundtable
-    const rtRef = doc(getDB(), 'roundtables', result.roundtableId)
-    const rtSnap = await getDoc(rtRef)
+    try {
+			const rtRef = doc(getDB(), 'roundtables', result.roundtableId)
+			const rtSnap = await getDoc(rtRef)
 
-    if (rtSnap.exists()) {
-      const data = rtSnap.data()
-      const participantIds = Array.isArray(data.participantIds)
-        ? data.participantIds
-        : []
+			if (rtSnap.exists()) {
+				const data = rtSnap.data()
+				const participantIds = Array.isArray(data.participantIds)
+					? data.participantIds
+					: []
 
-      if (participantIds.includes(userStore.uid)) {
-        await router.replace(`/roundtables/${result.roundtableId}`)
-        return
-      }
-    }
+				if (
+					data.ownerId === userStore.uid ||
+					participantIds.includes(userStore.uid)
+				) {
+					await router.replace(`/roundtables/${result.roundtableId}`)
+					return
+				}
+			}
+		} catch (e) {
+			if (e?.code !== 'permission-denied') {
+				console.error('Failed to check roundtable membership:', e)
+			}
+		}
   } catch (e) {
     console.error('Failed to load invite:', e)
     invite.value = null
@@ -195,6 +213,14 @@ onMounted(async () => {
             <v-icon start>mdi-account-plus</v-icon>
             Join
           </v-btn>
+          <v-alert
+            v-if="joinError"
+            type="error"
+            variant="tonal"
+            class="mt-4"
+          >
+            {{ joinError }}
+          </v-alert>
         </v-card-actions>
       </v-card>
     </template>
