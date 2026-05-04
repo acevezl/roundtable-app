@@ -225,7 +225,12 @@ async function leaveRoundTable(rt) {
           </v-btn>
           <v-btn color="secondary" variant="flat" @click="goBack"> Back </v-btn>
         </v-card-actions>
+        
       </div>
+      <ResultsRoundtableResults
+        v-if="roundtable.status.toLowerCase() === 'closed'"
+        :roundtable-id="roundtableId"
+      />
       <template v-if="roundtable && roundtable.status.toLowerCase() !== 'closed'">
         Add question:
         <InlineAdd
@@ -277,10 +282,6 @@ async function leaveRoundTable(rt) {
           </div>
         </v-card-text>
       </v-card>
-      <ResultsRoundtableResults
-        v-if="roundtable.status.toLowerCase() === 'closed'"
-        :roundtable-id="roundtableId"
-      />
     </template>
 
     <v-alert
