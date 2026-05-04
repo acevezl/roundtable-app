@@ -358,16 +358,16 @@ async function deleteRoundtable(rt) {
                         <v-chip
                           size="x-small"
                           variant="tonal"
-                          :color="rt.status === 'Open' ? 'success' : 'error'"
+                          :color="rt.status.toLowerCase() === 'open' ? 'success' : 'error'"
                         >
                           <v-icon size="14">
                             {{
-                              rt.status === 'Open'
+                              rt.status.toLowerCase() === 'open'
                                 ? 'mdi-lock-open'
                                 : 'mdi-lock'
                             }}
                           </v-icon>
-                          {{ rt.status }}
+                          <span class="status">{{ rt.status }}</span>
                         </v-chip>
                       </div>
                     </template>
@@ -446,7 +446,7 @@ async function deleteRoundtable(rt) {
             </v-btn>
 
             <v-btn
-              v-if="isOwner && rt.status == 'Open'"
+              v-if="isOwner && rt.status.toLowerCase() == 'open'"
               color="tertiary"
               variant="flat"
               @click="shareRoundtable(rt)"

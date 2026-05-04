@@ -20,6 +20,7 @@ import {
 import { getDB } from '~/services/fireinit'
 import { useUserStore } from '~/stores/user'
 import { useFirestoreCollection } from '~/composables/useFirestoreCollection'
+import { round } from 'firebase/firestore/pipelines'
 
 export const useRoundtablesStore = defineStore('roundtables', () => {
   const userStore = useUserStore()
@@ -119,15 +120,16 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
   }
 
   async function closeVoting(id) {
-    const existing = findLoadedRoundtable(id)
-    if (!existing) throw new Error('Round table not found')
 
+    if (!userStore.uid) throw new Error('User must be logged in')
+    if (!id) throw new Error('Round table id is required')
+    
     loading.value = true
     try {
       const now = new Date().toISOString()
 
       await ownedCollection.update(id, {
-        status: 'Closed',
+        status: 'closed',
         updatedAt: now,
       })
     } finally {
@@ -148,7 +150,7 @@ export const useRoundtablesStore = defineStore('roundtables', () => {
         ownerId: userStore.uid,
         ownerName: userStore.name || userStore.email || 'Unknown user',
         participantIds: [userStore.uid],
-        status: 'Open',
+        status: 'open',
         createdAt: now,
         updatedAt: now,
       })

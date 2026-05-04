@@ -87,11 +87,21 @@ async function shareRoundtable(rt) {
   }
 }
 
-async function leaveRoundTable() {
-  if (!roundtable.value) return
+async function closeRoundtableVoting(rt) {
+  if (!rt) return
 
   try {
-    await roundtablesStore.unsubscribeFromRoundtable(roundtable.value.id)
+    await roundtablesStore.closeVoting(rt.id)
+  } catch (err) {
+    console.error('Error closing voting for roundtable:', err)
+  }
+}
+
+async function leaveRoundTable(rt) {
+  if (!rt) return
+
+  try {
+    await roundtablesStore.unsubscribeFromRoundtable(rt.id)
     await router.replace(`/roundtables`)
   } catch (err) {
     console.error('Unsubscribe failed:', err)
@@ -115,14 +125,14 @@ async function leaveRoundTable() {
             <v-chip
               size="x-small"
               variant="tonal"
-              :color="roundtable.status === 'Open' ? 'success' : 'error'"
+              :color="roundtable.status.toLowerCase() === 'open' ? 'success' : 'error'"
             >
               <v-icon size="14">
                 {{
-                  roundtable.status === 'Open' ? 'mdi-lock-open' : 'mdi-lock'
+                  roundtable.status.toLowerCase() === 'open' ? 'mdi-lock-open' : 'mdi-lock'
                 }}
               </v-icon>
-              {{ roundtable.status }}
+              <span class="status">{{ roundtable.status }}</span>
             </v-chip>
           </div>
 
@@ -173,7 +183,7 @@ async function leaveRoundTable() {
       <div class="d-flex flex-wrap align-center ga-2">
         <v-card-actions class="ma-0 pa-0">
           <v-btn
-            v-if="isOwner && roundtable.status == 'Open'"
+            v-if="isOwner && roundtable.status.toLowerCase() == 'open'"
             color="tertiary"
             variant="flat"
             @click="shareRoundtable(roundtable)"
@@ -181,7 +191,18 @@ async function leaveRoundTable() {
             <v-icon start>mdi-share-variant</v-icon>
             Share
           </v-btn>
-          <v-btn v-if="isParticipant" color="primary" variant="flat" disabled>
+
+          <v-btn
+            v-if="isOwner && roundtable.status.toLowerCase() == 'open'"
+            color="primary"
+            variant="flat"
+            @click="closeRoundtableVoting(roundtable)"
+          >
+            <v-icon start>mdi-progress-close</v-icon>
+            Close Voting
+          </v-btn>
+
+          <v-btn v-if="isParticipant && !isOwner" color="primary" variant="flat" disabled>
             <v-icon start>mdi-check</v-icon>
             Joined
           </v-btn>
@@ -194,7 +215,7 @@ async function leaveRoundTable() {
             color="secondary"
             variant="outlined"
             :loading="roundtablesStore.loading"
-            @click="leaveRoundTable"
+            @click="leaveRoundTable(roundtable)"
           >
             <v-icon start>mdi-account-remove</v-icon>
             Leave
@@ -251,7 +272,7 @@ async function leaveRoundTable() {
         </v-card-text>
       </v-card>
       <ResultsRoundtableResults
-        v-if="roundtable.status?.toLowerCase() === 'closed'"
+        v-if="roundtable.status.toLowerCase() === 'closed'"
         :roundtable-id="roundtableId"
       />
     </template>
