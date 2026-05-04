@@ -2,6 +2,7 @@
 defineProps({
   option: { type: Object, required: true },
   voted: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['editOption', 'removeOption', 'toggleVote'])
 </script>
@@ -11,11 +12,13 @@ const emit = defineEmits(['editOption', 'removeOption', 'toggleVote'])
     <EditableTitle
       :title="option.title"
       placeholder="Option title"
+      :readonly="disabled"
       @submit="(t) => emit('editOption', t)"
     >
       <span>{{ option.title }}</span>
     </EditableTitle>
     <v-btn
+      v-if="!disabled"
       icon="mdi-delete"
       size="small"
       variant="tonal"
@@ -26,6 +29,7 @@ const emit = defineEmits(['editOption', 'removeOption', 'toggleVote'])
     <v-btn
       :icon="voted ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'"
       :color="voted ? 'success' : undefined"
+      :disabled="disabled"
       size="small"
       variant="tonal"
       density="comfortable"

@@ -92,6 +92,9 @@ async function closeRoundtableVoting(rt) {
 
   try {
     await roundtablesStore.closeVoting(rt.id)
+    for (const q of questions.value) {
+      await setWinningOption(q.id)
+    }
   } catch (err) {
     console.error('Error closing voting for roundtable:', err)
   }
@@ -223,11 +226,13 @@ async function leaveRoundTable(rt) {
           <v-btn color="secondary" variant="flat" @click="goBack"> Back </v-btn>
         </v-card-actions>
       </div>
-      Add question:
-      <InlineAdd
-        placeholder="Add question"
-        @submit="(title) => addQuestion({ title })"
-      />
+      <template v-if="roundtable && roundtable.status.toLowerCase() !== 'closed'">
+        Add question:
+        <InlineAdd
+          placeholder="Add question"
+          @submit="(title) => addQuestion({ title })"
+        />
+      </template>
     </div>
 
     <v-alert
@@ -261,6 +266,7 @@ async function leaveRoundTable(rt) {
             <template v-for="q in questions" :key="q.id">
               <QuestionCard
                 :question="q"
+                :disabled="roundtable.status.toLowerCase() === 'closed'"
                 @editQuestionTitle="(title) => editQuestionTitle(q.id, title)"
                 @removeQuestion="removeQuestion(q.id)"
                 @toggleVote="(optionId) => toggleVoteForOption(q.id, optionId)"

@@ -4,6 +4,7 @@ import { ref, nextTick } from 'vue'
 const props = defineProps({
   title: { type: String, required: true },
   placeholder: { type: String, default: '' },
+  readonly: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['submit'])
@@ -38,6 +39,7 @@ function handleSubmit() {
     <template v-if="!editing">
       <slot />
       <v-btn
+        v-if="!readonly"
         icon="mdi-pencil"
         size="x-small"
         variant="text"

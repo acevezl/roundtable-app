@@ -13,6 +13,7 @@ const emit = defineEmits([
 const props = defineProps({
   question: { type: Object, required: true },
   winningVote: { type: String, default: null },
+  disabled: { type: Boolean, default: false },
 })
 
 const userStore = useUserStore()
@@ -47,6 +48,7 @@ const winningOptionTitle = computed(() => {
           <EditableTitle
             :title="question.title"
             placeholder="Question title"
+            :readonly="disabled"
             @submit="(t) => emit('editQuestionTitle', t)"
           >
             <h3 class="text-h6 my-0">{{ question.title }}</h3>
@@ -54,6 +56,7 @@ const winningOptionTitle = computed(() => {
         </div>
 
         <v-btn
+          v-if="!disabled"
           icon="mdi-delete"
           size="small"
           variant="text"
@@ -67,12 +70,14 @@ const winningOptionTitle = computed(() => {
     <v-divider />
 
     <v-card-text class="pt-4">
-      <div class="text-body-2 text-medium-emphasis mb-2">Add option</div>
+      <template v-if="!disabled">
+        <div class="text-body-2 text-medium-emphasis mb-2">Add option</div>
 
-      <InlineAdd
-        placeholder="Add option"
-        @submit="(title) => addOption({ title })"
-      />
+        <InlineAdd
+          placeholder="Add option"
+          @submit="(title) => addOption({ title })"
+        />
+      </template>
     <!-- Options -->
       <div
         v-if="options.length === 0"
@@ -91,6 +96,7 @@ const winningOptionTitle = computed(() => {
             <OptionCard
               :option="o"
               :voted="hasVoted(o.id)"
+              :disabled="disabled"
               @editOption="(title) => editOption(o.id, title)"
               @toggleVote="emit('toggleVote', o.id)"
               @removeOption="
