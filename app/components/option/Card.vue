@@ -1,10 +1,15 @@
 <script setup>
-defineProps({
+import { useUserStore } from '~/stores/user'
+
+const props = defineProps({
   option: { type: Object, required: true },
   voted: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['editOption', 'removeOption', 'toggleVote'])
+
+const userStore = useUserStore()
+const isOwner = computed(() => props.option.ownerId === userStore.uid)
 </script>
 
 <template>
@@ -12,18 +17,19 @@ const emit = defineEmits(['editOption', 'removeOption', 'toggleVote'])
     <EditableTitle
       :title="option.title"
       placeholder="Option title"
-      :readonly="disabled"
+      :readonly="disabled || !isOwner"
       @submit="(t) => emit('editOption', t)"
     >
       <span>{{ option.title }}</span>
     </EditableTitle>
     <v-btn
-      v-if="!disabled"
+      v-if="!disabled && isOwner"
       icon="mdi-delete"
       size="small"
       variant="tonal"
       density="comfortable"
       aria-label="Delete option"
+      :readonly="disabled || !isOwner"
       @click="emit('removeOption')"
     />
     <v-btn

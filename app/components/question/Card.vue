@@ -30,6 +30,8 @@ const hasVoted = (optionId) => {
   return Array.isArray(voters) && voters.includes(userStore.uid)
 }
 
+const isOwner = computed(() => props.question.ownerId === userStore.uid)
+
 const winningOptionTitle = computed(() => {
   if (!props.question.winningVote) return null
   const option = options.value.find(o => o.id === props.question.winningVote)
@@ -62,6 +64,7 @@ const expanded = ref(false)
               v-if="expanded"
               :title="question.title"
               placeholder="Question title"
+              :readonly="!isOwner"
               @submit="(t) => emit('editQuestionTitle', t)"
             >
               <h3 class="text-h6 my-0">{{ question.title }}</h3>
@@ -71,7 +74,7 @@ const expanded = ref(false)
         </div>
 
         <v-btn
-          v-if="expanded"
+          v-if="expanded && isOwner"
           icon="mdi-delete"
           size="small"
           variant="text"
