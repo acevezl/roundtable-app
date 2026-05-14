@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
     'user-not-found': 'User not found, try to sign up instead',
     'wrong-password': 'Wrong password',
     'email-already-in-use': 'Email already in use, try to sign in instead',
-    'invalid-credential': 'Invalid e-mail or password',
+    'invalid-credential': 'Account does not exist, or wrong password used',
     'too-many-requests': 'Too many attempts, try again later',
     'network-request-failed': 'Network error, please try again',
   }
